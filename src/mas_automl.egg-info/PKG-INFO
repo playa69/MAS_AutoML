@@ -1,3 +1,38 @@
+Metadata-Version: 2.4
+Name: mas-automl
+Version: 0.1.0
+Summary: Прототип мультиагентной системы для оркестрации AutoML-фреймворков и мета-оптимизации пайплайнов.
+Author: ITMO Bootcamp Team
+License: Proprietary
+Requires-Python: <3.12,>=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2.5
+Requires-Dist: typer>=0.9
+Requires-Dist: httpx>=0.27
+Requires-Dist: beautifulsoup4>=4.12
+Requires-Dist: lxml>=4.9
+Requires-Dist: aiofiles>=23.2
+Requires-Dist: rich>=13.7
+Requires-Dist: pandas>=2.1
+Requires-Dist: numpy>=1.26
+Requires-Dist: scikit-learn>=1.3
+Requires-Dist: mlflow>=2.9
+Requires-Dist: langchain>=0.2
+Requires-Dist: openai>=1.2
+Requires-Dist: tiktoken>=0.5
+Requires-Dist: pydantic-settings>=2.0
+Provides-Extra: automl
+Requires-Dist: autogluon.tabular>=1.0; python_version < "3.12" and extra == "automl"
+Requires-Dist: fedot>=0.7; extra == "automl"
+Requires-Dist: lightgbm>=4.1; extra == "automl"
+Requires-Dist: catboost>=1.2; extra == "automl"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21; extra == "dev"
+Requires-Dist: ruff>=0.1; extra == "dev"
+Requires-Dist: mypy>=1.6; extra == "dev"
+Requires-Dist: types-requests; extra == "dev"
+
 # Мультиагентный прототип для оркестрации AutoML
 
 ## Описание

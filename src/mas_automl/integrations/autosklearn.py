@@ -6,6 +6,7 @@ from typing import Awaitable, Callable
 
 from ..pipelines.registry import PipelineStep
 from ..services.orchestrator import FrameworkAdapter, FrameworkResult, dummy_execute
+__all__ = ["AutoGluonAdapter", "AutoSklearnAdapter", "FedotAdapter"]
 
 
 def autosklearn_adapter() -> FrameworkAdapter:
