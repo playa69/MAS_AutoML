@@ -21,9 +21,10 @@ venv/
 
 # Data & artifacts
 data/raw/*
-data/processed/*
+data/datasets/.metadata/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+*.csv
 
 # uv
 uv.lock

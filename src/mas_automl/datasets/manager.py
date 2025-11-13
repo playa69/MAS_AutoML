@@ -74,10 +74,18 @@ class DatasetManager:
             try:
                 with open(local_metadata_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
+                    if not isinstance(data, dict):
+                        raise ValueError(f"Ожидался словарь, получен {type(data).__name__}")
                     for name, metadata_dict in data.items():
+                        if not isinstance(metadata_dict, dict):
+                            print(f"Предупреждение: пропущен некорректный элемент '{name}' в локальном реестре (ожидался словарь, получен {type(metadata_dict).__name__})")
+                            continue
+                        if "path" not in metadata_dict:
+                            print(f"Предупреждение: пропущен элемент '{name}' без поля 'path' в локальном реестре")
+                            continue
                         metadata_dict["path"] = Path(metadata_dict["path"])
                         self._local_registry[name] = DatasetMetadata(**metadata_dict)
-            except (json.JSONDecodeError, KeyError, ValueError) as e:
+            except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
                 print(f"Предупреждение: не удалось загрузить локальный реестр: {e}")
 
         # Загрузка OpenML датасетов
@@ -86,8 +94,17 @@ class DatasetManager:
             try:
                 with open(openml_metadata_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
+                    if not isinstance(data, dict):
+                        raise ValueError(f"Ожидался словарь, получен {type(data).__name__}")
                     for dataset_id_str, metadata_dict in data.items():
-                        dataset_id = int(dataset_id_str)
+                        if not isinstance(metadata_dict, dict):
+                            print(f"Предупреждение: пропущен некорректный элемент '{dataset_id_str}' в OpenML реестре (ожидался словарь, получен {type(metadata_dict).__name__})")
+                            continue
+                        try:
+                            dataset_id = int(dataset_id_str)
+                        except ValueError:
+                            print(f"Предупреждение: пропущен элемент с некорректным ID '{dataset_id_str}' в OpenML реестре")
+                            continue
                         # Преобразуем datetime строки обратно в datetime объекты
                         if "upload_date" in metadata_dict and metadata_dict["upload_date"]:
                             metadata_dict["upload_date"] = datetime.fromisoformat(
@@ -97,8 +114,9 @@ class DatasetManager:
                         if "local_path" in metadata_dict and metadata_dict["local_path"]:
                             metadata_dict["local_path"] = Path(metadata_dict["local_path"])
                         self._openml_registry[dataset_id] = OpenMLDatasetMetadata(**metadata_dict)
-                        self._name_to_openml_id[metadata_dict["name"]] = dataset_id
-            except (json.JSONDecodeError, KeyError, ValueError) as e:
+                        if "name" in metadata_dict:
+                            self._name_to_openml_id[metadata_dict["name"]] = dataset_id
+            except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
                 print(f"Предупреждение: не удалось загрузить OpenML реестр: {e}")
 
     def _save_registry(self) -> None:
