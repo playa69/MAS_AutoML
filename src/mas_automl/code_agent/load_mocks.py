@@ -9,7 +9,6 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
 MOCKS_DIR = ROOT_DIR / "data" / "mocks"
 
 
-@lru_cache(maxsize=None)
 def _load_json(filename: str) -> Dict[str, Any]:
     path = MOCKS_DIR / filename
     if not path.exists():
