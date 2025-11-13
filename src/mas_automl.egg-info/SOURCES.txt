@@ -5,7 +5,6 @@ src/mas_automl/__main__.py
 src/mas_automl.egg-info/PKG-INFO
 src/mas_automl.egg-info/SOURCES.txt
 src/mas_automl.egg-info/dependency_links.txt
-src/mas_automl.egg-info/entry_points.txt
 src/mas_automl.egg-info/requires.txt
 src/mas_automl.egg-info/top_level.txt
 src/mas_automl/agents/__init__.py

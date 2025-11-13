@@ -30,6 +30,7 @@ dependencies = [
     "arxiv>=2.1",
   "pydantic-settings>=2.0",
   "openml>=0.15",
+  "openAI",
 ]
 
 [project.optional-dependencies]

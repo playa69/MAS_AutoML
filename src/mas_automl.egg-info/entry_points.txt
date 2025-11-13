@@ -1,2 +1,0 @@
-[console_scripts]
-aetherml = mas_automl.__main__:app
