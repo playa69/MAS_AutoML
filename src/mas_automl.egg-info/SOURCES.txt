@@ -14,6 +14,9 @@ src/mas_automl/agents/executor.py
 src/mas_automl/agents/planner.py
 src/mas_automl/agents/researcher.py
 src/mas_automl/config/settings.py
+src/mas_automl/datasets/__init__.py
+src/mas_automl/datasets/manager.py
+src/mas_automl/datasets/models.py
 src/mas_automl/integrations/__init__.py
 src/mas_automl/integrations/autogluon.py
 src/mas_automl/integrations/autosklearn.py
