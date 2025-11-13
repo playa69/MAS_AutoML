@@ -45,6 +45,7 @@ dev = [
   "ruff>=0.1",
   "mypy>=1.6",
   "types-requests",
+  "ipykernel",
 ]
 
 [tool.uv]

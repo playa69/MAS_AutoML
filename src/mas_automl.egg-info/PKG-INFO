@@ -33,6 +33,7 @@ Requires-Dist: pytest-asyncio>=0.21; extra == "dev"
 Requires-Dist: ruff>=0.1; extra == "dev"
 Requires-Dist: mypy>=1.6; extra == "dev"
 Requires-Dist: types-requests; extra == "dev"
+Requires-Dist: ipykernel; extra == "dev"
 
 # Мультиагентный прототип для оркестрации AutoML
 
@@ -75,15 +76,21 @@ Requires-Dist: types-requests; extra == "dev"
    ```
 4. Для добавления тяжёлых AutoML-фреймворков установите дополнительный набор:
    ```bash
-   uv sync --extras automl
+   uv sync --extra automl
    ```
    > **Примечание:** `auto-sklearn` доступен только в Linux окружениях. Установите его вручную при необходимости:
    ```bash
    uv pip install "auto-sklearn<0.15" --python 3.10
    ```
-5. Запустите демонстрационный скрипт (по мере заполнения):
+5. Установите dev-зависимости для тестирования и линтинга:
    ```bash
-   uv run scripts/run_pipeline.py --help
+   uv sync --extra dev
+   ```
+6. Запустите демонстрационный скрипт/CLI:
+   ```bash
+   uv run aetherml --help
+   # Альтернатива (если по каким-то причинам не сработал entry point):
+   uv run -m mas_automl --help
    ```
 
 ## Основные компоненты
@@ -93,6 +100,76 @@ Requires-Dist: types-requests; extra == "dev"
 - `ExecutorAgent` — оркестрирует запуск выбранных AutoML-фреймворков и сбор результатов.
 - `HybridPipeline` — объект-описание пайплайна, объединяющего шаги из разных фреймворков.
 - `BenchmarkRunner` — сервис, обеспечивающий сравнение гибридных решений с базовыми.
+
+## Как запускать тесты
+
+- Запуск всех тестов:
+  ```bash
+  uv run -m pytest
+  ```
+
+- Запуск тестов интеграций (smoke) для адаптеров:
+  ```bash
+  uv run -m pytest tests/test_integrations_baseline.py -q
+  ```
+  # Если нету dev-зависимостей, установите:
+  # uv sync --extra dev
+
+- На Windows отсутствие `auto-sklearn` не приведёт к падению: в тестах используется `pytest.importorskip`, и соответствующие сценарии будут пропущены, если фреймворк не установлен.
+
+- Полезные флаги:
+  - `-k "<substr>"` — отфильтровать тесты по подстроке;
+  - `-vv` — подробный вывод;
+  - `-s` — не захватывать stdout/stderr (удобно для отладки);
+  - `--maxfail=1` — остановиться на первом падении.
+
+Пример запуска одного теста с подробным выводом:
+```bash
+uv run -m pytest tests/test_integrations_baseline.py::test_autogluon_adapter_runs_on_synthetic_data -vv -s
+```
+
+## Как запускать сервис/CLI
+
+CLI уже экспортирован как консольная команда `aetherml`:
+```bash
+uv run aetherml --help
+```
+
+- Показать список зарегистрированных пайплайнов:
+  ```bash
+  uv run aetherml list-pipelines
+  ```
+
+- Запустить пайплайн (по умолчанию `default` из `pipelines/registry.py`):
+  ```bash
+  uv run aetherml run --name default
+  ```
+
+> Примечание: адаптеры ожидают в параметрах шага `params['dataset']` словарь вида:
+> ```python
+> {
+>   "train": pd.DataFrame,  # обучающая выборка с колонкой таргета
+>   "test": pd.DataFrame,   # тестовая выборка с колонкой таргета
+>   "label": "target",      # имя колонки таргета
+>   "problem_type": "classification" | "regression",  # опционально
+> }
+> ```
+> В демонстрационном CLI данные не подгружаются автоматически — он показывает каркас оркестрации и агрегации метрик.
+
+## Отладка и дебаг
+
+- Быстрая локальная проверка адаптера на синтетике — см. тесты в `tests/test_integrations_baseline.py`. Их удобно использовать как живые примеры входного формата.
+- Если нужно посмотреть метрики и трассировку:
+  - добавьте временные `print()` или `rich.print()` в адаптер;
+  - запустите один тест с флагами `-vv -s`.
+- Линтинг и типизация:
+  ```bash
+  uv run ruff check .
+  uv run mypy src
+  ```
+- Работа с тяжелыми фреймворками:
+  - Устанавливайте через `uv sync --extras automl`. На Windows некоторые пакеты (например, `auto-sklearn`) недоступны — соответствующие тесты будут пропущены.
+  - Для экономии времени подберите минимальные значения `time_limit`/`timeout` в `step.params` для адаптеров.
 
 ## Дальнейшие шаги
 
