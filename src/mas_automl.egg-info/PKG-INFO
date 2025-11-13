@@ -27,7 +27,6 @@ Requires-Dist: tiktoken>=0.5
 Requires-Dist: arxiv>=2.1
 Requires-Dist: pydantic-settings>=2.0
 Requires-Dist: openml>=0.15
-Requires-Dist: openAI
 Provides-Extra: automl
 Requires-Dist: autogluon.tabular>=1.0; python_version < "3.12" and extra == "automl"
 Requires-Dist: fedot>=0.7; extra == "automl"
