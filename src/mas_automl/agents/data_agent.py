@@ -105,6 +105,193 @@ class DataAgentConfig:
     high_cardinality_ratio: float = DEFAULTS["validation_thresholds"]["high_cardinality_ratio"]
 
 
+def _safe_ratio(numer: float | int, denom: float | int, default: float = 0.0) -> float:
+    try:
+        d = float(denom)
+        return float(numer) / d if d else default
+    except Exception:
+        return default
+
+
+def generate_code_agent_recommendation(
+    validation_report: dict, metafeatures: dict, config: dict | None = None
+) -> dict:
+    """
+    Build a machine- and human-readable recipe for Code Agent based on:
+      - validation_report: result of data checks
+      - metafeatures: dataset- and feature-level statistics
+      - config: optional thresholds (col_missing_threshold, high_cardinality_ratio, ...)
+    Returns dict matching the agreed schema.
+    """
+    cfg = {
+        "col_missing_threshold": 0.6,
+        "high_cardinality_ratio": 0.05,  # categorical unique / n_rows
+        "small_dataset_rows": 500,
+        "confidence_base": 0.9,
+    }
+    if config:
+        cfg.update(config)
+
+    ds_meta = metafeatures.get("dataset", {}) or {}
+    n_rows = ds_meta.get("n_rows") or validation_report.get("dataset", {}).get("rows")
+    n_cols = ds_meta.get("n_cols") or validation_report.get("dataset", {}).get("cols")
+
+    # infer task_type
+    task_type = (
+        validation_report.get("dataset", {}).get("task_type")
+        or metafeatures.get("dataset", {}).get("task_type")
+        or "unknown"
+    )
+
+    features = metafeatures.get("features", {}) or {}
+    high_card_cols: list[str] = []
+    categorical_cols: list[str] = []
+    numeric_cols: list[str] = []
+    datetime_cols: list[str] = []
+    for fname, fmeta in features.items():
+        dtype = str(fmeta.get("dtype", "")).lower()
+        u = int(fmeta.get("n_unique", 0) or 0)
+        if "cat" in dtype or dtype in ("object", "category", "string"):
+            categorical_cols.append(fname)
+            if n_rows and _safe_ratio(u, n_rows) >= cfg["high_cardinality_ratio"]:
+                high_card_cols.append(fname)
+        elif "date" in dtype or "time" in dtype:
+            datetime_cols.append(fname)
+        else:
+            numeric_cols.append(fname)
+
+    priority = "must"
+    if task_type == "time_series" or len(datetime_cols) > 0:
+        priority = "must"
+    elif n_rows and int(n_rows) < int(cfg["small_dataset_rows"]):
+        priority = "should"
+
+    steps: list[dict[str, Any]] = []
+    steps.append(
+        {
+            "id": "s1_detect",
+            "action": "detect_types",
+            "tool": "pandas",
+            "params": {"infer_datetime": True},
+            "example_code": "df.dtypes.to_dict()",
+        }
+    )
+    if numeric_cols:
+        steps.append(
+            {
+                "id": "s2_impute_numeric",
+                "action": "impute",
+                "tool": "sklearn",
+                "params": {"col_selector": "numeric", "strategy": "median"},
+                "example_code": "SimpleImputer(strategy='median')",
+            }
+        )
+        steps.append(
+            {
+                "id": "s4_scale",
+                "action": "scale",
+                "tool": "sklearn",
+                "params": {"col_selector": "numeric", "method": "StandardScaler"},
+                "example_code": "StandardScaler()",
+            }
+        )
+
+    if categorical_cols:
+        steps.append(
+            {
+                "id": "s3_impute_categorical",
+                "action": "impute",
+                "tool": "sklearn",
+                "params": {"col_selector": "categorical", "strategy": "most_frequent"},
+                "example_code": "SimpleImputer(strategy='most_frequent')",
+            }
+        )
+        method_by_card = {"low": "onehot", "high": "target_encoder"}
+        steps.append(
+            {
+                "id": "s3_encode",
+                "action": "encode",
+                "tool": "category_encoders",
+                "params": {
+                    "col_selector": "categorical",
+                    "method_by_cardinality": method_by_card,
+                    "high_cardinality_cols": high_card_cols,
+                },
+                "example_code": "TargetEncoder(cols=high_card_cols)",
+            }
+        )
+
+    if task_type == "time_series" or datetime_cols:
+        steps.append(
+            {
+                "id": "s5_time_features",
+                "action": "feature_engineer",
+                "tool": "pandas",
+                "params": {
+                    "datetime_cols": datetime_cols,
+                    "extract": ["year", "month", "day", "dow", "hour"],
+                },
+                "example_code": "df['ts'].dt.month",
+            }
+        )
+        steps.append(
+            {
+                "id": "s6_split_temporal",
+                "action": "split",
+                "tool": "sklearn",
+                "params": {"method": "temporal_order"},
+                "example_code": "df.sort_values('timestamp')",
+            }
+        )
+
+    summary = (
+        "Median impute and scale numerics; impute categoricals; one-hot low-cardinality "
+        "and target-encode high-cardinality; add basic datetime features if present."
+    )
+    rationale = (
+        "Rules selected to stabilize training and control dimensionality while preserving signal. "
+        "Temporal features are expanded when datetime columns exist to capture seasonality."
+    )
+    example_pipeline = (
+        "from sklearn.pipeline import Pipeline\n"
+        "from sklearn.compose import ColumnTransformer\n"
+        "from sklearn.impute import SimpleImputer\n"
+        "from sklearn.preprocessing import StandardScaler, OneHotEncoder\n"
+        "from category_encoders import TargetEncoder\n"
+        "numeric_cols = " + json.dumps(numeric_cols) + "\n"
+        "categorical_cols = " + json.dumps(categorical_cols) + "\n"
+        "high_card_cols = " + json.dumps(high_card_cols) + "\n"
+        "low_card_cols = [c for c in categorical_cols if c not in high_card_cols]\n"
+        "num_pipe = Pipeline([('impute', SimpleImputer(strategy='median')), ('scale', StandardScaler())])\n"
+        "low_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', OneHotEncoder(handle_unknown='ignore', sparse_output=False))])\n"
+        "high_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', TargetEncoder(cols=high_card_cols))])\n"
+        "preproc = ColumnTransformer([\n"
+        "    ('num', num_pipe, numeric_cols),\n"
+        "    ('low_cat', low_cat_pipe, low_card_cols),\n"
+        "    ('high_cat', high_cat_pipe, high_card_cols),\n"
+        "])"
+    )
+
+    confidence = float(cfg["confidence_base"])
+    high_missing_cols = (validation_report.get("warnings", {}) or {}).get("high_missing_cols") or []
+    if high_missing_cols:
+        confidence -= 0.05
+    if validation_report.get("leakage_suspects"):
+        confidence -= 0.05
+    confidence = max(0.5, min(confidence, 0.95))
+
+    return {
+        "summary": summary,
+        "priority": priority,
+        "steps": steps,
+        "example_pipeline_snippet": example_pipeline,
+        "frameworks_recommended": ["pandas", "scikit-learn", "category_encoders", "mlflow"],
+        "rationale": rationale,
+        "estimated_complexity": "medium",
+        "confidence": round(confidence, 2),
+    }
+
+
 class DataAgent(Agent):
     def __init__(self, name: str = "AetherML", context: AgentContext | None = None) -> None:
         super().__init__(name=name, context=context)
@@ -147,10 +334,17 @@ class DataAgent(Agent):
         run_metadata = self._register_run(dataset_id, task_type, run_loc.root)
         run_metadata_url = self.artifacts.save_json(run_loc, "run_metadata.json", run_metadata)
 
-        # 6) Recommendations
-        recommendation = self._generate_recommendations(validation_report, metafeatures, task_type)
+        # 6) Recommendations via standalone function and save as preprocessing_recipe.json
+        recommendation = generate_code_agent_recommendation(
+            validation_report,
+            metafeatures,
+            {
+                "col_missing_threshold": self.cfg.col_missing_threshold,
+                "high_cardinality_ratio": self.cfg.high_cardinality_ratio,
+            },
+        )
         recommendation_url = self.artifacts.save_json(
-            run_loc, "code_agent_recommendation.json", recommendation
+            run_loc, "preprocessing_recipe.json", recommendation
         )
 
         warnings = []
