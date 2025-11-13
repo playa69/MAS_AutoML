@@ -29,3 +29,4 @@ data/datasets/.metadata/*
 # uv
 uv.lock
 
+src/mas_automl.egg-info/*
