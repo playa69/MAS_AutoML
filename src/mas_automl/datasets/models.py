@@ -44,7 +44,6 @@ class DatasetMetadata(BaseModel):
     num_rows: int | None = Field(None, description="Количество строк")
     num_features: int | None = Field(None, description="Количество признаков")
     num_classes: int | None = Field(None, description="Количество классов (для classification)")
-    is_processed: bool = Field(False, description="Обработан ли датасет")
     tags: list[str] = Field(default_factory=list, description="Теги для категоризации")
     extra_info: dict[str, Any] = Field(default_factory=dict, description="Дополнительная информация")
 
@@ -106,6 +105,6 @@ class OpenMLDatasetMetadata(BaseModel):
     # Дополнительная информация
     extra_info: dict[str, Any] = Field(default_factory=dict, description="Дополнительные метаданные")
 
-    # Локальный путь (если датасет был скачан)
-    local_path: Path | None = Field(None, description="Локальный путь к файлу датасета")
+    # Локальный путь к файлу датасета
+    local_path: Path | None = Field(None, description="Локальный путь к файлу датасета (определяется при создании метаданных, даже если файл еще не скачан)")
 

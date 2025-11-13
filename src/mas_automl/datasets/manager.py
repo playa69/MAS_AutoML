@@ -36,7 +36,6 @@ class DatasetManager:
     def __init__(
         self,
         raw_data_dir: Path | None = None,
-        processed_data_dir: Path | None = None,
         metadata_dir: Path | None = None,
         cache_openml: bool = True,
     ) -> None:
@@ -45,19 +44,16 @@ class DatasetManager:
 
         Args:
             raw_data_dir: Директория с сырыми датасетами
-            processed_data_dir: Директория с обработанными датасетами
             metadata_dir: Директория для хранения метаданных
             cache_openml: Кэшировать ли датасеты из OpenML локально
         """
         workspace_root = settings.workspace_root
         self.raw_data_dir = raw_data_dir or workspace_root / "data" / "raw"
-        self.processed_data_dir = processed_data_dir or workspace_root / "data" / "processed"
         self.metadata_dir = metadata_dir or workspace_root / "data" / ".metadata"
         self.cache_openml = cache_openml
 
         # Создаём директории, если их нет
         self.raw_data_dir.mkdir(parents=True, exist_ok=True)
-        self.processed_data_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
         self._local_registry: dict[str, DatasetMetadata] = {}
@@ -188,12 +184,13 @@ class DatasetManager:
         # Кэшируем данные локально, если включено кэширование
         should_cache = cache if cache is not None else self.cache_openml
         if should_cache:
-            local_path = self.raw_data_dir / f"openml_{dataset_id}_{openml_dataset.name}.csv"
-            df.to_csv(local_path, index=False)
-            # Обновляем метаданные с путём к локальному файлу
-            metadata.local_path = local_path
-            self._openml_registry[dataset_id] = metadata
-            self._save_registry()
+            # Используем путь из метаданных (уже определён при создании)
+            local_path = metadata.local_path
+            if local_path:
+                df.to_csv(local_path, index=False)
+                # Обновляем метаданные в реестре
+                self._openml_registry[dataset_id] = metadata
+                self._save_registry()
 
         return df
 
@@ -231,7 +228,14 @@ class DatasetManager:
 
         # Проверяем кэш - если метаданные уже загружены, возвращаем их
         if dataset_id in self._openml_registry:
-            return self._openml_registry[dataset_id]
+            metadata = self._openml_registry[dataset_id]
+            # Если local_path не установлен (старые метаданные), устанавливаем его
+            if metadata.local_path is None:
+                safe_name = metadata.name.replace("/", "_").replace("\\", "_").replace(":", "_")
+                metadata.local_path = self.raw_data_dir / f"openml_{dataset_id}_{safe_name}.csv"
+                self._openml_registry[dataset_id] = metadata
+                self._save_registry()
+            return metadata
 
         # Загружаем метаданные из OpenML (без скачивания данных)
         openml_dataset = openml.datasets.get_dataset(dataset_id, download_data=False)
@@ -282,6 +286,11 @@ class DatasetManager:
             elif "regression" in tags_lower:
                 dataset_type = DatasetType.REGRESSION
 
+        # Определяем путь к локальному файлу (даже если он еще не скачан)
+        # Используем безопасное имя файла (заменяем недопустимые символы)
+        safe_name = openml_dataset.name.replace("/", "_").replace("\\", "_").replace(":", "_")
+        local_path = self.raw_data_dir / f"openml_{openml_dataset.dataset_id}_{safe_name}.csv"
+
         return OpenMLDatasetMetadata(
             dataset_id=openml_dataset.dataset_id,
             name=openml_dataset.name,
@@ -314,6 +323,7 @@ class DatasetManager:
             tags=getattr(openml_dataset, "tags", []) or [],
             status=getattr(openml_dataset, "status", None),
             visibility=getattr(openml_dataset, "visibility", None),
+            local_path=local_path,
         )
 
     def _infer_dataset_type(self, metadata: OpenMLDatasetMetadata) -> DatasetType:
@@ -438,7 +448,6 @@ class DatasetManager:
         description: str | None = None,
         dataset_type: DatasetType | None = None,
         target_column: str | None = None,
-        is_processed: bool = False,
         tags: list[str] | None = None,
         extra_info: dict[str, Any] | None = None,
         auto_detect: bool = True,
@@ -452,7 +461,6 @@ class DatasetManager:
             description: Описание датасета
             dataset_type: Тип задачи ML (если None, будет определён автоматически)
             target_column: Название целевой колонки
-            is_processed: Обработан ли датасет
             tags: Теги для категоризации
             extra_info: Дополнительная информация
             auto_detect: Автоматически определить метаданные из данных
@@ -478,7 +486,6 @@ class DatasetManager:
             format=file_format,
             dataset_type=dataset_type or DatasetType.UNKNOWN,
             target_column=target_column,
-            is_processed=is_processed,
             tags=tags or [],
             extra_info=extra_info or {},
         )

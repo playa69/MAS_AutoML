@@ -283,7 +283,7 @@
     "status": null,
     "visibility": "public",
     "extra_info": {},
-    "local_path": null
+    "local_path": "/Users/aleksandr/Documents/projects/MAS_AutoML/experiments/notebooks/data/raw/openml_37_diabetes.csv"
   },
   "3": {
     "dataset_id": 3,
