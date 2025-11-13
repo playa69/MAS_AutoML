@@ -24,6 +24,7 @@ dependencies = [
   "openai>=1.2",
   "tiktoken>=0.5",
   "pydantic-settings>=2.0",
+  "ollama",
 ]
 
 [project.optional-dependencies]
@@ -39,6 +40,7 @@ dev = [
   "ruff>=0.1",
   "mypy>=1.6",
   "types-requests",
+  "ipykernel",
 ]
 
 [tool.uv]
@@ -62,4 +64,7 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 addopts = "--maxfail=1 --disable-warnings"
+
+[project.scripts]
+aetherml = "mas_automl.__main__:app"
 
