@@ -9,6 +9,35 @@ from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def find_project_root(start_path: Path | None = None) -> Path:
+    """Найти корень проекта, ища файлы-маркеры (pyproject.toml, .git, README.md).
+    
+    Args:
+        start_path: Начальный путь для поиска. Если None, используется текущий файл.
+    
+    Returns:
+        Путь к корню проекта.
+    """
+    if start_path is None:
+        # Используем путь к текущему файлу как отправную точку
+        # Из src/mas_automl/config/settings.py поднимаемся до корня проекта
+        start_path = Path(__file__).parent.parent.parent.parent
+    
+    current = Path(start_path).resolve()
+    
+    # Маркеры корня проекта
+    markers = ["pyproject.toml", ".git", "README.md", "setup.py"]
+    
+    # Поднимаемся вверх по директориям, пока не найдём маркер
+    for parent in [current] + list(current.parents):
+        for marker in markers:
+            if (parent / marker).exists():
+                return parent
+    
+    # Если маркер не найден, возвращаем текущую директорию
+    return current
+
+
 class AutoMLFrameworkConfig(BaseSettings):
     """Настройки для отдельного AutoML-фреймворка."""
 
@@ -75,8 +104,8 @@ class MASSettings(BaseSettings):
     benchmark: BenchmarkConfig = BenchmarkConfig()
     llm: LLMConfig = Field(default_factory=LLMConfig.from_env)
     agents: AgentsConfig = AgentsConfig()
-    workspace_root: Path = Path(".").resolve()
-    cache_dir: Path = workspace_root / ".cache"
+    workspace_root: Path = Field(default_factory=lambda: find_project_root())
+    cache_dir: Path = Field(default_factory=lambda: find_project_root() / ".cache")
 
 
 settings = MASSettings()

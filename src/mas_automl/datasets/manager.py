@@ -48,8 +48,8 @@ class DatasetManager:
             cache_openml: Кэшировать ли датасеты из OpenML локально
         """
         workspace_root = settings.workspace_root
-        self.raw_data_dir = raw_data_dir or workspace_root / "data" / "raw"
-        self.metadata_dir = metadata_dir or workspace_root / "data" / ".metadata"
+        self.raw_data_dir = raw_data_dir or workspace_root / "data" / "datasets"
+        self.metadata_dir = metadata_dir or workspace_root / "data" / "datasets" / ".metadata"
         self.cache_openml = cache_openml
 
         # Создаём директории, если их нет
