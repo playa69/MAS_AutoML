@@ -5,8 +5,37 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal, Sequence
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def find_project_root(start_path: Path | None = None) -> Path:
+    """Найти корень проекта, ища файлы-маркеры (pyproject.toml, .git, README.md).
+    
+    Args:
+        start_path: Начальный путь для поиска. Если None, используется текущий файл.
+    
+    Returns:
+        Путь к корню проекта.
+    """
+    if start_path is None:
+        # Используем путь к текущему файлу как отправную точку
+        # Из src/mas_automl/config/settings.py поднимаемся до корня проекта
+        start_path = Path(__file__).parent.parent.parent.parent
+    
+    current = Path(start_path).resolve()
+    
+    # Маркеры корня проекта
+    markers = ["pyproject.toml", ".git", "README.md", "setup.py"]
+    
+    # Поднимаемся вверх по директориям, пока не найдём маркер
+    for parent in [current] + list(current.parents):
+        for marker in markers:
+            if (parent / marker).exists():
+                return parent
+    
+    # Если маркер не найден, возвращаем текущую директорию
+    return current
 
 
 class AutoMLFrameworkConfig(BaseSettings):
@@ -27,14 +56,36 @@ class BenchmarkConfig(BaseSettings):
     max_concurrency: int = 1
 
 
-class LLMConfig(BaseSettings):
-    """Настройки для подключения LLM."""
+class LLMConfig(BaseModel):
+    """Конфигурация для подключения LLM. Может быть использована для каждого агента отдельно."""
 
-    provider: Literal["openai", "azure", "anthropic", "local"] = "openai"
-    model: str = "gpt-4.1"
-    temperature: float = 0.2
-    max_tokens: int = 2048
+    provider: Literal["openai", "azure", "anthropic", "local", "openrouter"] = "openai"
+    model: str = "google/gemini-2.0-flash-001"
     api_key: str | None = None
+    base_url: str | None = None
+
+    @classmethod
+    def from_env(cls, model: str | None = None) -> LLMConfig:
+        """Создать конфигурацию из переменных окружения.
+        
+        Args:
+            model: Модель для использования. Если не указана, используется дефолтная.
+        """
+        import os
+        return cls(
+            provider="openrouter",
+            model=model or "google/gemini-2.0-flash-001",
+            api_key=os.getenv("API_KEY") or os.getenv("OPENROUTER_API_KEY"),
+            base_url=os.getenv("BASE_URL") or "https://openrouter.ai/api/v1",
+        )
+
+
+class AgentsConfig(BaseModel):
+    """Конфигурация LLM для агентов. Каждый агент может иметь свою модель."""
+
+    paper_researcher: LLMConfig = Field(
+        default_factory=lambda: LLMConfig(model="google/gemini-2.0-flash-001")
+    )
 
 
 class MASSettings(BaseSettings):
@@ -49,10 +100,12 @@ class MASSettings(BaseSettings):
             AutoMLFrameworkConfig(name="fedot", preset="auto"),
         ]
     )
+
     benchmark: BenchmarkConfig = BenchmarkConfig()
-    llm: LLMConfig = LLMConfig()
-    workspace_root: Path = Path(".").resolve()
-    cache_dir: Path = workspace_root / ".cache"
+    llm: LLMConfig = Field(default_factory=LLMConfig.from_env)
+    agents: AgentsConfig = AgentsConfig()
+    workspace_root: Path = Field(default_factory=lambda: find_project_root())
+    cache_dir: Path = Field(default_factory=lambda: find_project_root() / ".cache")
 
 
 settings = MASSettings()
