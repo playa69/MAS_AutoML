@@ -19,6 +19,7 @@ tiktoken>=0.5
 arxiv>=2.1
 pydantic-settings>=2.0
 openml>=0.15
+execnet
 
 [automl]
 fedot>=0.7
