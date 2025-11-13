@@ -4,6 +4,7 @@ import asyncio
 import json
 from pathlib import Path
 import sys
+import argparse
 from typing import Any
 
 import numpy as np
@@ -67,8 +68,17 @@ async def _run(dataset_id: str, target: str | None = None) -> dict[str, Any]:
 
 
 def main() -> None:
-    dataset_id = _ensure_demo_dataset()
-    payload = asyncio.run(_run(dataset_id))
+    parser = argparse.ArgumentParser(description="Run DataAgent on demo or real AMLB dataset.")
+    parser.add_argument("--dataset-id", type=str, default=None, help="AMLB dataset ID (folder under data/amlb/). If omitted, a demo dataset is generated.")
+    parser.add_argument("--target", type=str, default=None, help="Optional target column name.")
+    args = parser.parse_args()
+
+    if args.dataset_id:
+        dataset_id = args.dataset_id
+    else:
+        dataset_id = _ensure_demo_dataset()
+
+    payload = asyncio.run(_run(dataset_id, target=args.target))
     print("\n=== DataAgent Result (keys) ===")
     print(sorted(payload.keys()))
     print("\nmanifest:", json.dumps(payload["manifest"], indent=2))
@@ -76,6 +86,7 @@ def main() -> None:
     print("split_metadata_url:", payload["split_metadata_url"])
     print("metafeatures_url:", payload["metafeatures_url"])
     print("run_metadata_url:", payload["run_metadata_url"])
+    print("preprocessing_recipe_url:", payload.get("preprocessing_recipe_url"))
     print("code_agent_recommendation_url:", payload.get("code_agent_recommendation_url"))
     print("\n=== Code Agent Recommendation (summary) ===")
     print(payload["code_agent_recommendation"]["summary"])

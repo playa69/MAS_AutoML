@@ -1,71 +1,111 @@
-# Мультиагентный прототип для оркестрации AutoML
+# MAS_AutoML — Дата-агент (AetherML)
 
-## Описание
-
-Репозиторий содержит прототип мультиагентной системы (МАС), предназначенной для построения гибридных пайплайнов машинного обучения на основе нескольких AutoML-фреймворков. Система поддерживает сценарии:
-
-- базовый: оркестрация существующих AutoML-фреймворков (AutoGluon, Auto-sklearn 2.0, FEDOT и т.д.) через промпты и function calling;
-- продвинутый: расширение пайплайнов за счёт поиска новых моделей в научных публикациях, их кодовой реализации и интеграции в выбранные AutoML-инструменты;
-- мета-оптимизация: динамическая комбинация сильных сторон разных AutoML-фреймворков и сравнение результатов гибридного пайплайна с индивидуальными решениями.
-
-В качестве эталонных датасетов для проверки качества предлагается использовать `AMLB: an AutoML Benchmark`.
-
-## Структура проекта
-
-```
-├── data/                     # Заготовленные каталоги для датасетов
-├── docs/                     # Документация и дизайн-артефакты
-├── experiments/notebooks/    # Исследовательские ноутбуки
-├── scripts/                  # CLI-скрипты для запуска пайплайнов
-├── src/mas_automl/           # Исходный код МАС
-│   ├── agents/               # Агент-планировщик, исследователь, исполнитель
-│   ├── config/               # Конфигурационные схемы и настройки
-│   ├── integrations/         # Адаптеры к AutoML-фреймворкам и сторонним сервисам
-│   ├── pipelines/            # Регистры и описание гибридных пайплайнов
-│   └── services/             # Оркестраторы, вспомогательные сервисы
-└── tests/                    # Автоматические проверки и smokе-тесты
-```
+Дата-агент загружает наборы данных AMLB (локальные или OpenML), валидирует схему/качество, выполняет разбиение на обучающую/тестовую выборки, считает метапризнаки, регистрирует запуск (MLflow) и генерирует рецепт препроцессинга/фичеинжиниринга для Код-агента.
 
 ## Быстрый старт
 
-1. Установите [uv](https://github.com/astral-sh/uv) (если ещё не установлен).
-2. Создайте и активируйте виртуальное окружение (Python 3.11):
-   ```bash
-   uv venv --python 3.11
-   ```
-3. Синхронизируйте зависимости (базовый набор):
-   ```bash
-   uv sync
-   ```
-4. Для добавления тяжёлых AutoML-фреймворков установите дополнительный набор:
-   ```bash
-   uv sync --extras automl
-   ```
-   > **Примечание:** `auto-sklearn` доступен только в Linux окружениях. Установите его вручную при необходимости:
-   ```bash
-   uv pip install "auto-sklearn<0.15" --python 3.10
-   ```
-5. Запустите демонстрационный скрипт (по мере заполнения):
-   ```bash
-   uv run scripts/run_pipeline.py --help
-   ```
+- Самый быстрый путь (без установки пакета, из исходников):
 
-## Основные компоненты
+```bash
+cd /Users/sergeykudriashov/itmo_autods/MAS_AutoML
+PYTHONPATH=src python3 scripts/check_data_agent.py
+```
 
-- `PlannerAgent` — отвечает за анализ задачи и формирование плана пайплайна.
-- `ResearchAgent` — выполняет анализ литературы и веб-источников для поиска новых моделей.
-- `ExecutorAgent` — оркестрирует запуск выбранных AutoML-фреймворков и сбор результатов.
-- `HybridPipeline` — объект-описание пайплайна, объединяющего шаги из разных фреймворков.
-- `BenchmarkRunner` — сервис, обеспечивающий сравнение гибридных решений с базовыми.
+Скрипт создаст синтетический датасет в `data/amlb/demo_agent/` и выполнит агент end-to-end.
 
-## Дальнейшие шаги
+## Запуск на реальном датасете AMLB
 
-- Добавить реальные промпты и подключение LLM API для агентов.
-- Реализовать адаптеры к выбранным AutoML-фреймворкам (AutoGluon, Auto-sklearn 2.0, FEDOT и др.).
-- Настроить автоматический веб-скрейпинг и извлечение новых моделей из научных статей.
-- Подготовить набор сценариев на базовых датасетах AMLB для воспроизводимых экспериментов.
+- Положите CSV в `data/amlb/<dataset_id>/` или передайте OpenML ID/URL:
 
-## Лицензия
+```bash
+# Локальная папка с данными
+PYTHONPATH=src python3 scripts/check_data_agent.py --dataset-id adult --target income
 
-Добавьте выбранную лицензию в файл `LICENSE` при необходимости.
+# OpenML по URL (таргет берётся из OpenML автоматически, если указан в наборе)
+PYTHONPATH=src python3 scripts/check_data_agent.py --dataset-id "https://www.openml.org/search?type=data&sort=runs&status=active&id=31"
 
+# OpenML по ID или схеме
+PYTHONPATH=src python3 scripts/check_data_agent.py --dataset-id 31
+PYTHONPATH=src python3 scripts/check_data_agent.py --dataset-id openml:31
+```
+
+Примечания:
+
+- `--target` опционален. Для OpenML таргет берётся из набора; для локальных CSV он угадывается по имени (`target`, `class`, `label`, `y`, суффиксы), иначе берётся последний столбец.
+- Наборы, скачанные с OpenML, кэшируются в `data/amlb/openml_<id>/data.csv`.
+
+## Результаты (артефакты)
+
+Артефакты сохраняются в:
+
+- `data/processed/aetherml/<dataset_id>/<timestamp>/`
+  - `validation_report.json`
+  - `split_metadata.json` (+ `splits/train.csv`, `splits/test.csv`)
+  - `metafeatures.json`
+  - `preprocessing_recipe.json` — машинно/человеко‑читаемые шаги для Код‑агента
+  - `code_agent_recommendation.json` — единый JSON-бандл с манифестом, валидацией, метапризнаками, рецептом и метаданными запуска
+  - `run_metadata.json`
+
+Все артефакты также логируются в MLflow: `mlruns/0/<run_id>/artifacts/`.
+
+## Программное использование
+
+```python
+import asyncio
+from mas_automl.agents import DataAgent, AgentMessage
+
+async def run(dataset_id: str, target: str | None = None):
+    agent = DataAgent()
+    msg = AgentMessage(sender="user", recipient="AetherML", content="prepare",
+                       payload={"dataset_id": dataset_id, "target": target})
+    res = await agent.handle(msg)
+    return res.payload  # dict с URL-ами и code_agent_recommendation
+
+# Пример:
+# asyncio.run(run("openml:31"))
+```
+
+## Интеграция в MAS
+
+- Дата-агент доступен как `mas_automl.agents.DataAgent`.
+- Типовой сценарий:
+  1. Планировщик/Исследователь выбирает `dataset_id`.
+  2. Исполнитель вызывает `DataAgent.handle(...)` с payload `{"dataset_id": "...", "target": optional}`.
+  3. Используем поля ответа:
+     - `preprocessing_recipe_url` и/или `code_agent_recommendation_url` для Код‑агента.
+     - `split_metadata_url`, `validation_report_url`, `metafeatures_url` для адаптеров AutoML‑фреймворков.
+
+Минимальный пример интеграции:
+
+```python
+from mas_automl.agents import DataAgent, AgentMessage
+
+async def prepare_dataset_for_code_agent(dataset_id: str):
+    agent = DataAgent()
+    res = await agent.handle(AgentMessage(sender="orchestrator", recipient="AetherML",
+                                          content="prepare", payload={"dataset_id": dataset_id}))
+    return {
+        "preprocessing_recipe_url": res.payload["preprocessing_recipe_url"],
+        "code_agent_recommendation_url": res.payload["code_agent_recommendation_url"],
+        "train_test_split": res.payload["split_metadata_url"],
+    }
+```
+
+## Конфигурация
+
+- Настройки из `src/mas_automl/config/settings.py`:
+  - `benchmark.aml_benchmark_root`: корневая папка AMLB (по умолчанию `data/amlb`)
+  - Пороговые значения по умолчанию: пропуски 0.6, high-cardinality 0.5, train_size 0.8, seed 42
+- Можно задавать через переменные окружения с префиксом `MAS_` (pydantic-settings).
+
+## Зависимости
+
+- Базовые: pandas, numpy, scikit-learn, pydantic, pydantic-settings, mlflow
+- Опциональные: category_encoders, featuretools (рекомендуются рецептом; не обязательны для запуска агента)
+
+Установка через PDM:
+
+```bash
+pdm install
+pdm run python scripts/check_data_agent.py --dataset-id openml:31
+```

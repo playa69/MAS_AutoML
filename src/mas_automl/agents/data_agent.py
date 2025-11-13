@@ -343,7 +343,7 @@ class DataAgent(Agent):
                 "high_cardinality_ratio": self.cfg.high_cardinality_ratio,
             },
         )
-        recommendation_url = self.artifacts.save_json(
+        preprocessing_recipe_url = self.artifacts.save_json(
             run_loc, "preprocessing_recipe.json", recommendation
         )
 
@@ -353,6 +353,65 @@ class DataAgent(Agent):
         warnings.extend([f"high_missingness: {c}" for c in validation_report["warnings"].get("high_missing_cols", [])])
         if imbalance := validation_report["warnings"].get("imbalance"):
             warnings.append(f"imbalance: {imbalance}")
+
+        # Also produce a single JSON for Code Agent consumption with full bundle
+        manifest_dict = manifest.to_dict()
+        feature_types = validation_report.get("feature_types", {})
+        num_cols = feature_types.get("numeric", []) or []
+        cat_cols = feature_types.get("categorical", []) or []
+        dt_cols = feature_types.get("datetime", []) or []
+        text_cols = feature_types.get("text", []) or []
+        high_card_cols = validation_report.get("high_cardinality", []) or []
+        low_card_cols = [c for c in cat_cols if c not in high_card_cols]
+        task_type_str: str = validation_report.get("dataset", {}).get("task_type", "unknown")
+        # augment preprocessing recipe with explicit columns and task_type
+        preprocessing_recipe = dict(recommendation)
+        preprocessing_recipe.update(
+            {
+                "task_type": task_type_str,
+                "numeric_columns": num_cols,
+                "categorical_columns": cat_cols,
+                "datetime_columns": dt_cols,
+                "text_columns": text_cols,
+                "high_cardinality_cols": high_card_cols,
+                "low_card_cols": low_card_cols,
+                "recommended_split": (
+                    "temporal" if dt_cols and task_type_str != "classification" else "stratified"
+                ),
+            }
+        )
+        # run metadata enriched
+        enriched_run_metadata = dict(run_metadata)
+        enriched_run_metadata.update(
+            {
+                "end_time": _now_iso(),
+                "status": "FINISHED",
+                "dataset_id": manifest.dataset_id,
+                "validation_report_url": validation_report_url,
+                "metafeatures_url": metafeatures_url,
+                "preprocessing_recipe_url": preprocessing_recipe_url,
+                "generated_by": "data_agent_v0.2",
+            }
+        )
+        combined_bundle = {
+            "manifest": manifest_dict,
+            "validation_report": validation_report,
+            "metafeatures": metafeatures,
+            "preprocessing_recipe": preprocessing_recipe,
+            "code_agent_recommendation": {
+                "summary": "See preprocessing_recipe. Use provided steps/columns; fall back to conservative pipeline if confidence < 0.7.",
+                "recommended_artifacts": {
+                    "preprocessing_recipe_key": "preprocessing_recipe",
+                    "validation_report_key": "validation_report",
+                    "metafeatures_key": "metafeatures",
+                    "manifest_key": "manifest",
+                },
+            },
+            "run_metadata": enriched_run_metadata,
+        }
+        code_agent_recommendation_url = self.artifacts.save_json(
+            run_loc, "code_agent_recommendation.json", combined_bundle
+        )
 
         response_payload: dict[str, Any] = {
             "ok": True,
@@ -366,7 +425,8 @@ class DataAgent(Agent):
             "split_metadata_url": split_metadata_url,
             "metafeatures_url": metafeatures_url,
             "run_metadata_url": run_metadata_url,
-            "code_agent_recommendation_url": recommendation_url,
+            "preprocessing_recipe_url": preprocessing_recipe_url,
+            "code_agent_recommendation_url": code_agent_recommendation_url,
             "warnings": warnings,
             "errors": [],
             "timestamp": _now_iso(),
