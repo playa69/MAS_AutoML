@@ -16,6 +16,8 @@ else:
 
 DEFAULT_MAX_ITERATIONS = 3
 
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+
 
 @dataclass
 class PipelineResult:
@@ -61,44 +63,82 @@ def choose_framework(
     registry: Dict[str, str],
     llm: LLMClient,
 ) -> Tuple[str, str]:
-    dataset_summary = data_analysis.get("summary", "Нет описания.")
-    metadata_preview = json.dumps(
-        {k: metadata.get(k) for k in ("name", "dataset_type", "num_rows", "num_features")},
-        ensure_ascii=False,
-        indent=2,
-    )
-    frameworks_list = "\n".join(f"- {name}" for name in registry)
+    """
+    Расширенный выбор лучшего AutoML-фреймворка с помощью ChatPromptTemplate.
+    """
 
-    prompt = (
-        "Даны описание датасета, основные метаданные и список AutoML-фреймворков. "
-        "Выбери лучший фреймворк и объясни выбор.\n"
-        f"Описание датасета: {dataset_summary}\n"
-        f"Метаданные: {metadata_preview}\n"
-        f"Доступные фреймворки:\n{frameworks_list}\n\n"
-        'Ответ верни в JSON: {"framework": "...", "reason": "..."}'
-    )
-
+    # --- Дефолтные значения и fallback ---
     fallback_framework = _fallback_framework_choice(metadata, registry)
     fallback = json.dumps(
         {"framework": fallback_framework, "reason": "Эвристика на основе типа задачи и размера выборки."},
         ensure_ascii=False,
     )
 
-    raw_response = llm.chat(prompt, fallback=fallback)
-    try:
-        parsed = json.loads(raw_response)
-        framework_name = parsed["framework"]
-        reason = parsed.get("reason", "Без объяснения.")
-    except Exception:
-        framework_name = fallback_framework
-        reason = "Не удалось распарсить ответ LLM; использована эвристика."
+    # --- Форматируем данные для контекста ---
+    frameworks_list = "\n".join(
+                            f"\n\n###### {name} ---> {desc} ######"
+                            for name, desc in registry.items()
+    )
 
-    if framework_name not in registry:
-        framework_name = fallback_framework
+    metadata_json = json.dumps(metadata, ensure_ascii=False, indent=2)
+    analysis_json = json.dumps(data_analysis, ensure_ascii=False, indent=2)
+
+    # --- Prompt шаблон ---
+    prompt = ChatPromptTemplate.from_messages([
+        SystemMessagePromptTemplate.from_template(
+            "Ты — эксперт по AutoML и ML-инженер. "
+            "Твоя задача — выбрать наиболее подходящий AutoML-фреймворк для табличных данных. "
+            "Оцени качество данных, размер, тип задачи, ограничения и предложи лучший вариант из списка."
+        ),
+        HumanMessagePromptTemplate.from_template(
+            "Вот анализ датасета и метаданные:\n\n"
+            "### 📊 Data Analysis\n{analysis_json}\n\n"
+            "### 🧾 Metadata\n{metadata_json}\n\n"
+            "### ⚙️ Доступные AutoML фреймворки\n{frameworks_list}\n\n"
+            "Поясни свой выбор кратко, но содержательно. "
+            "Если несколько подходят, выбери наиболее универсальный и стабильный вариант. "
+            "Ответ верни в формате JSON:\n"
+            "{{\"framework\": \"...\", \"reason\": \"...\"}}"
+        )
+    ])
+  
+    # --- Формируем финальный текст промпта ---
+    formatted_prompt = prompt.format_messages(
+        analysis_json=analysis_json,
+        metadata_json=metadata_json,
+        frameworks_list=frameworks_list,
+    )
+
+    # --- Вызов LLM ---
+    try:
+        llm_response = llm._client.invoke(formatted_prompt)
+        content = getattr(llm_response, "content", "").strip()
+        parsed = json.loads(content)
+        framework = parsed.get("framework", fallback_framework)
+        reason = parsed.get("reason", "Без объяснения.")
+    except Exception as e:
+        print("⚠️ Ошибка при вызове LLM или парсинге:", repr(e))
+        framework, reason = fallback_framework, "Ошибка в ответе LLM; использована эвристика."
+
+    # --- Проверка валидности ---
+    if framework not in registry:
+        framework = fallback_framework
         reason = f"LLM предложил неизвестный фреймворк. Эвристика: {reason}"
 
-    return framework_name, reason
+    return framework, reason, prompt
 
+
+def _fallback_framework_choice(metadata: Dict[str, Any], registry: Dict[str, str]) -> str:
+    dataset_type = (metadata.get("dataset_type") or "").lower()
+    num_rows = metadata.get("num_rows") or 0
+
+    if dataset_type in {"classification", "binary"} and num_rows <= 50_000 and "AutoGluon" in registry:
+        return "AutoGluon"
+    if num_rows > 100_000 and "H2O AutoML" in registry:
+        return "H2O AutoML"
+    if "LightAutoML" in registry:
+        return "LightAutoML"
+    return next(iter(registry.keys()))
 
 def generate_code(framework: str, llm: LLMClient, iteration: int, feedback: str) -> str:
     prompt = (
@@ -126,19 +166,6 @@ def evaluate_code(code: str, framework: str) -> Tuple[bool, str]:
         return False, "Код должен вызывать обучение (fit/train)."
 
     return True, "Проверки пройдены."
-
-
-def _fallback_framework_choice(metadata: Dict[str, Any], registry: Dict[str, str]) -> str:
-    dataset_type = (metadata.get("dataset_type") or "").lower()
-    num_rows = metadata.get("num_rows") or 0
-
-    if dataset_type in {"classification", "binary"} and num_rows <= 50_000 and "AutoGluon" in registry:
-        return "AutoGluon"
-    if num_rows > 100_000 and "H2O AutoML" in registry:
-        return "H2O AutoML"
-    if "LightAutoML" in registry:
-        return "LightAutoML"
-    return next(iter(registry.keys()))
 
 
 def _fallback_code_template(framework: str) -> str:
