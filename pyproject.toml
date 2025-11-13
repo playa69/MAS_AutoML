@@ -24,6 +24,7 @@ dependencies = [
   "openai>=1.2",
   "tiktoken>=0.5",
   "pydantic-settings>=2.0",
+  "openml>=0.15",
 ]
 
 [project.optional-dependencies]
@@ -62,4 +63,9 @@ plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 addopts = "--maxfail=1 --disable-warnings"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.1.0",
+]
 
