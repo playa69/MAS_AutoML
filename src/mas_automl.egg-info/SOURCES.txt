@@ -7,11 +7,10 @@ src/mas_automl.egg-info/SOURCES.txt
 src/mas_automl.egg-info/dependency_links.txt
 src/mas_automl.egg-info/requires.txt
 src/mas_automl.egg-info/top_level.txt
-src/mas_automl/agents/__init__.py
-src/mas_automl/agents/base.py
-src/mas_automl/agents/executor.py
-src/mas_automl/agents/planner.py
-src/mas_automl/agents/researcher.py
+src/mas_automl/code_agent/__init__.py
+src/mas_automl/code_agent/base_pipeline.py
+src/mas_automl/code_agent/load_mocks.py
+src/mas_automl/code_agent/openai_wraper.py
 src/mas_automl/config/settings.py
 src/mas_automl/datasets/__init__.py
 src/mas_automl/datasets/manager.py
