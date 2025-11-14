@@ -52,17 +52,27 @@ class LoggingStream:
         self.logger = logger
         self.buffer = ""
         self.first_line_flag = True
+        self._writing = False  # Простой флаг для предотвращения рекурсии
 
     def write(self, message):
-        if self.first_line_flag:
-            self.logger.error(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]"))
-            self.first_line_flag = False
+        # Если уже пишем, выводим напрямую в stdout чтобы избежать рекурсии
+        if self._writing:
+            sys.stdout.write(message)
+            return
+        
+        self._writing = True
+        try:
+            if self.first_line_flag:
+                self.logger.error(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]"))
+                self.first_line_flag = False
 
-        self.buffer += message
+            self.buffer += message
 
-        if self.buffer.endswith("\n"):
-            self.logger.error(self.buffer[:-1])
-            self.buffer = ""
+            if self.buffer.endswith("\n"):
+                self.logger.error(self.buffer[:-1])
+                self.buffer = ""
+        finally:
+            self._writing = False
 
     def flush(self):
         pass
