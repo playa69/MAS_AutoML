@@ -1,0 +1,74 @@
+{
+  "summary": "Build sklearn pipeline: median impute, one-hot low-cardinality, target-encode high-cardinality, scale numeric; optional interactions.",
+  "priority": "must",
+  "task_type": "classification",
+  "steps": [
+    {
+      "id": "s1_detect",
+      "action": "detect_types",
+      "tool": "pandas",
+      "params": {
+        "infer_datetime": true
+      },
+      "example_code": "df.dtypes.to_dict()"
+    },
+    {
+      "id": "s2_impute_numeric",
+      "action": "impute",
+      "tool": "sklearn",
+      "params": {
+        "col_selector": "numeric",
+        "strategy": "median"
+      },
+      "example_code": "SimpleImputer(strategy='median')"
+    },
+    {
+      "id": "s3_encode",
+      "action": "encode",
+      "tool": "category_encoders",
+      "params": {
+        "col_selector": "categorical",
+        "method_by_cardinality": {
+          "low": "onehot",
+          "high": "target_encoder"
+        }
+      },
+      "example_code": "TargetEncoder(cols=high_card_cols)"
+    },
+    {
+      "id": "s4_scale",
+      "action": "scale",
+      "tool": "sklearn",
+      "params": {
+        "col_selector": "numeric",
+        "method": "StandardScaler"
+      },
+      "example_code": "StandardScaler()"
+    },
+    {
+      "id": "s5_featuretools",
+      "action": "feature_engineer",
+      "tool": "featuretools",
+      "params": {
+        "primitive_list": [
+          "mean",
+          "std",
+          "count"
+        ],
+        "max_depth": 2
+      },
+      "example_code": "ft.dfs(entityset=es, target_entity='X')"
+    }
+  ],
+  "example_pipeline_snippet": "from sklearn.pipeline import Pipeline\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom category_encoders import TargetEncoder\nfrom sklearn.ensemble import RandomForestClassifier, RandomForestRegressor\nnumeric_cols = [\"x1\", \"x2\"]\ncategorical_cols = [\"cat\", \"user_id\", \"timestamp\"]\nhigh_card_cols = [\"user_id\", \"timestamp\"]\nlow_card_cols = [c for c in categorical_cols if c not in high_card_cols]\nnum_pipe = Pipeline([('impute', SimpleImputer(strategy='median')), ('scale', StandardScaler())])\nlow_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', OneHotEncoder(handle_unknown='ignore', sparse_output=False))])\nhigh_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', TargetEncoder(cols=high_card_cols))])\npreproc = ColumnTransformer([\n    ('num', num_pipe, numeric_cols),\n    ('low_cat', low_cat_pipe, low_card_cols),\n    ('high_cat', high_cat_pipe, high_card_cols),\n])\nest = RandomForestClassifier()\nfull_pipeline = Pipeline([('preproc', preproc), ('est', est)])",
+  "frameworks_recommended": [
+    "pandas",
+    "scikit-learn",
+    "category_encoders",
+    "featuretools",
+    "mlflow"
+  ],
+  "rationale": "Median imputation is robust; target encoding controls dimensionality for high-cardinality categoricals; scaling stabilizes numeric features; one-hot for low-cardinality. Consider time-aware splits if temporal columns exist.",
+  "estimated_complexity": "medium",
+  "confidence": 0.87
+}

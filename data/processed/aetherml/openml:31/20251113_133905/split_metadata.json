@@ -1,0 +1,10 @@
+{
+  "method": "stratified",
+  "seed": 42,
+  "train_size": 0.8,
+  "target": "class",
+  "n_train": 800,
+  "n_test": 200,
+  "train_path": "file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/processed/aetherml/openml%3A31/20251113_133905/splits/train.csv",
+  "test_path": "file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/processed/aetherml/openml%3A31/20251113_133905/splits/test.csv"
+}

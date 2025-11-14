@@ -1,0 +1,59 @@
+{
+  "dataset": {
+    "rows": 500,
+    "cols": 7,
+    "target": "target",
+    "task_type": "classification",
+    "duplicates": 0
+  },
+  "feature_types": {
+    "numeric": [
+      "x1",
+      "x2"
+    ],
+    "categorical": [
+      "cat",
+      "user_id",
+      "timestamp"
+    ],
+    "datetime": [
+      "timestamp"
+    ],
+    "text": [
+      "text"
+    ]
+  },
+  "missing_per_column": {
+    "x1": 0.0,
+    "x2": 0.1,
+    "cat": 0.0,
+    "user_id": 0.0,
+    "timestamp": 0.0,
+    "text": 0.0
+  },
+  "high_cardinality": [
+    "user_id",
+    "timestamp"
+  ],
+  "temporal_columns": [
+    "timestamp"
+  ],
+  "leakage_suspects": [],
+  "warnings": {
+    "high_missing_cols": [],
+    "imbalance": null,
+    "outliers": null
+  },
+  "created_at": "2025-11-13T12:55:30.924861+00:00",
+  "source": {
+    "dataset_id": "demo_agent",
+    "source_url": "file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/amlb/demo_agent/data.csv",
+    "commit": null,
+    "local_path": "/Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/amlb/demo_agent/data.csv",
+    "shape": [
+      500,
+      7
+    ],
+    "target_column": "target"
+  }
+}

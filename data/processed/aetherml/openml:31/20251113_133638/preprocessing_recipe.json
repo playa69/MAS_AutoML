@@ -1,0 +1,69 @@
+{
+  "summary": "Median impute and scale numerics; impute categoricals; one-hot low-cardinality and target-encode high-cardinality; add basic datetime features if present.",
+  "priority": "must",
+  "steps": [
+    {
+      "id": "s1_detect",
+      "action": "detect_types",
+      "tool": "pandas",
+      "params": {
+        "infer_datetime": true
+      },
+      "example_code": "df.dtypes.to_dict()"
+    },
+    {
+      "id": "s2_impute_numeric",
+      "action": "impute",
+      "tool": "sklearn",
+      "params": {
+        "col_selector": "numeric",
+        "strategy": "median"
+      },
+      "example_code": "SimpleImputer(strategy='median')"
+    },
+    {
+      "id": "s4_scale",
+      "action": "scale",
+      "tool": "sklearn",
+      "params": {
+        "col_selector": "numeric",
+        "method": "StandardScaler"
+      },
+      "example_code": "StandardScaler()"
+    },
+    {
+      "id": "s3_impute_categorical",
+      "action": "impute",
+      "tool": "sklearn",
+      "params": {
+        "col_selector": "categorical",
+        "strategy": "most_frequent"
+      },
+      "example_code": "SimpleImputer(strategy='most_frequent')"
+    },
+    {
+      "id": "s3_encode",
+      "action": "encode",
+      "tool": "category_encoders",
+      "params": {
+        "col_selector": "categorical",
+        "method_by_cardinality": {
+          "low": "onehot",
+          "high": "target_encoder"
+        },
+        "high_cardinality_cols": []
+      },
+      "example_code": "TargetEncoder(cols=high_card_cols)"
+    }
+  ],
+  "example_pipeline_snippet": "from sklearn.pipeline import Pipeline\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom category_encoders import TargetEncoder\nnumeric_cols = [\"duration\", \"credit_amount\", \"installment_commitment\", \"residence_since\", \"age\", \"existing_credits\", \"num_dependents\"]\ncategorical_cols = [\"checking_status\", \"credit_history\", \"purpose\", \"savings_status\", \"employment\", \"personal_status\", \"other_parties\", \"property_magnitude\", \"other_payment_plans\", \"housing\", \"job\", \"own_telephone\", \"foreign_worker\"]\nhigh_card_cols = []\nlow_card_cols = [c for c in categorical_cols if c not in high_card_cols]\nnum_pipe = Pipeline([('impute', SimpleImputer(strategy='median')), ('scale', StandardScaler())])\nlow_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', OneHotEncoder(handle_unknown='ignore', sparse_output=False))])\nhigh_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', TargetEncoder(cols=high_card_cols))])\npreproc = ColumnTransformer([\n    ('num', num_pipe, numeric_cols),\n    ('low_cat', low_cat_pipe, low_card_cols),\n    ('high_cat', high_cat_pipe, high_card_cols),\n])",
+  "frameworks_recommended": [
+    "pandas",
+    "scikit-learn",
+    "category_encoders",
+    "mlflow"
+  ],
+  "rationale": "Rules selected to stabilize training and control dimensionality while preserving signal. Temporal features are expanded when datetime columns exist to capture seasonality.",
+  "estimated_complexity": "medium",
+  "confidence": 0.9
+}

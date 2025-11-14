@@ -1,0 +1,435 @@
+{
+  "manifest": {
+    "dataset_id": "openml_31",
+    "source_url": "openml:data_id=31",
+    "commit": null,
+    "local_path": "/Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/amlb/openml_31/data.csv",
+    "shape": [
+      1000,
+      21
+    ],
+    "target_column": "class"
+  },
+  "validation_report": {
+    "dataset": {
+      "rows": 1000,
+      "cols": 21,
+      "target": "class",
+      "task_type": "classification",
+      "duplicates": 0
+    },
+    "feature_types": {
+      "numeric": [
+        "duration",
+        "credit_amount",
+        "installment_commitment",
+        "residence_since",
+        "age",
+        "existing_credits",
+        "num_dependents"
+      ],
+      "categorical": [
+        "checking_status",
+        "credit_history",
+        "purpose",
+        "savings_status",
+        "employment",
+        "personal_status",
+        "other_parties",
+        "property_magnitude",
+        "other_payment_plans",
+        "housing",
+        "job",
+        "own_telephone",
+        "foreign_worker"
+      ],
+      "datetime": [],
+      "text": []
+    },
+    "missing_per_column": {
+      "checking_status": 0.0,
+      "duration": 0.0,
+      "credit_history": 0.0,
+      "purpose": 0.0,
+      "credit_amount": 0.0,
+      "savings_status": 0.0,
+      "employment": 0.0,
+      "installment_commitment": 0.0,
+      "personal_status": 0.0,
+      "other_parties": 0.0,
+      "residence_since": 0.0,
+      "property_magnitude": 0.0,
+      "age": 0.0,
+      "other_payment_plans": 0.0,
+      "housing": 0.0,
+      "existing_credits": 0.0,
+      "job": 0.0,
+      "num_dependents": 0.0,
+      "own_telephone": 0.0,
+      "foreign_worker": 0.0
+    },
+    "high_cardinality": [],
+    "temporal_columns": [],
+    "leakage_suspects": [],
+    "warnings": {
+      "high_missing_cols": [],
+      "imbalance": null,
+      "outliers": null
+    },
+    "created_at": "2025-11-13T13:43:34.800666+00:00",
+    "source": {
+      "dataset_id": "openml_31",
+      "source_url": "openml:data_id=31",
+      "commit": null,
+      "local_path": "/Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/amlb/openml_31/data.csv",
+      "shape": [
+        1000,
+        21
+      ],
+      "target_column": "class"
+    }
+  },
+  "metafeatures": {
+    "dataset": {
+      "id": "openml_31",
+      "n_rows": 1000,
+      "n_cols": 21,
+      "feature_types": {
+        "numeric": [
+          "duration",
+          "credit_amount",
+          "installment_commitment",
+          "residence_since",
+          "age",
+          "existing_credits",
+          "num_dependents"
+        ],
+        "categorical": [
+          "checking_status",
+          "credit_history",
+          "purpose",
+          "savings_status",
+          "employment",
+          "personal_status",
+          "other_parties",
+          "property_magnitude",
+          "other_payment_plans",
+          "housing",
+          "job",
+          "own_telephone",
+          "foreign_worker"
+        ],
+        "datetime": [],
+        "text": []
+      },
+      "missing_rate": 0.0,
+      "class_balance": {
+        "good": 0.7,
+        "bad": 0.3
+      },
+      "y_stats": null,
+      "correlations": {
+        "num_numeric": 7,
+        "high_corr_pairs": []
+      }
+    },
+    "features": {
+      "checking_status": {
+        "dtype": "object",
+        "n_unique": 4,
+        "missing_rate": 0.0,
+        "entropy": 1.8020430663568638,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "duration": {
+        "dtype": "int64",
+        "n_unique": 33,
+        "missing_rate": 0.0,
+        "entropy": 3.1572058770147375,
+        "skewness": 1.0941841715555418,
+        "kurtosis": 0.9197813600546372
+      },
+      "credit_history": {
+        "dtype": "object",
+        "n_unique": 5,
+        "missing_rate": 0.0,
+        "entropy": 1.7118729065103488,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "purpose": {
+        "dtype": "object",
+        "n_unique": 10,
+        "missing_rate": 0.0,
+        "entropy": 2.6666777598518516,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "credit_amount": {
+        "dtype": "int64",
+        "n_unique": 921,
+        "missing_rate": 0.0,
+        "entropy": 3.9999076620993845,
+        "skewness": 1.9496276798326209,
+        "kurtosis": 4.29259030804851
+      },
+      "savings_status": {
+        "dtype": "object",
+        "n_unique": 5,
+        "missing_rate": 0.0,
+        "entropy": 1.6877382670253747,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "employment": {
+        "dtype": "object",
+        "n_unique": 5,
+        "missing_rate": 0.0,
+        "entropy": 2.1551940769307802,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "installment_commitment": {
+        "dtype": "int64",
+        "n_unique": 4,
+        "missing_rate": 0.0,
+        "entropy": 1.2973982602767915,
+        "skewness": -0.5313481143125486,
+        "kurtosis": -1.2104731179379704
+      },
+      "personal_status": {
+        "dtype": "object",
+        "n_unique": 4,
+        "missing_rate": 0.0,
+        "entropy": 1.5321036281187232,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "other_parties": {
+        "dtype": "object",
+        "n_unique": 3,
+        "missing_rate": 0.0,
+        "entropy": 0.5384642094700389,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "residence_since": {
+        "dtype": "int64",
+        "n_unique": 4,
+        "missing_rate": 0.0,
+        "entropy": 1.3731586224701977,
+        "skewness": -0.2725698140337228,
+        "kurtosis": -1.3814485027493704
+      },
+      "property_magnitude": {
+        "dtype": "object",
+        "n_unique": 4,
+        "missing_rate": 0.0,
+        "entropy": 1.9477809939418367,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "age": {
+        "dtype": "int64",
+        "n_unique": 53,
+        "missing_rate": 0.0,
+        "entropy": 3.953103448961647,
+        "skewness": 1.0207392686768317,
+        "kurtosis": 0.5957795670766881
+      },
+      "other_payment_plans": {
+        "dtype": "object",
+        "n_unique": 3,
+        "missing_rate": 0.0,
+        "entropy": 0.8447134223319456,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "housing": {
+        "dtype": "object",
+        "n_unique": 3,
+        "missing_rate": 0.0,
+        "entropy": 1.1390117663236383,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "existing_credits": {
+        "dtype": "int64",
+        "n_unique": 4,
+        "missing_rate": 0.0,
+        "entropy": 0.9483407304604878,
+        "skewness": 1.2725759670020926,
+        "kurtosis": 1.6044393724243444
+      },
+      "job": {
+        "dtype": "object",
+        "n_unique": 4,
+        "missing_rate": 0.0,
+        "entropy": 1.4134054014000512,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "num_dependents": {
+        "dtype": "int64",
+        "n_unique": 2,
+        "missing_rate": 0.0,
+        "entropy": -0.0,
+        "skewness": 1.909444721297485,
+        "kurtosis": 1.6492736936698598
+      },
+      "own_telephone": {
+        "dtype": "object",
+        "n_unique": 2,
+        "missing_rate": 0.0,
+        "entropy": 0.9732424074349136,
+        "skewness": null,
+        "kurtosis": null
+      },
+      "foreign_worker": {
+        "dtype": "object",
+        "n_unique": 2,
+        "missing_rate": 0.0,
+        "entropy": 0.22836402584056464,
+        "skewness": null,
+        "kurtosis": null
+      }
+    },
+    "created_at": "2025-11-13T13:43:34.814581+00:00"
+  },
+  "preprocessing_recipe": {
+    "summary": "Median impute and scale numerics; impute categoricals; one-hot low-cardinality and target-encode high-cardinality; add basic datetime features if present.",
+    "priority": "must",
+    "steps": [
+      {
+        "id": "s1_detect",
+        "action": "detect_types",
+        "tool": "pandas",
+        "params": {
+          "infer_datetime": true
+        },
+        "example_code": "df.dtypes.to_dict()"
+      },
+      {
+        "id": "s2_impute_numeric",
+        "action": "impute",
+        "tool": "sklearn",
+        "params": {
+          "col_selector": "numeric",
+          "strategy": "median"
+        },
+        "example_code": "SimpleImputer(strategy='median')"
+      },
+      {
+        "id": "s4_scale",
+        "action": "scale",
+        "tool": "sklearn",
+        "params": {
+          "col_selector": "numeric",
+          "method": "StandardScaler"
+        },
+        "example_code": "StandardScaler()"
+      },
+      {
+        "id": "s3_impute_categorical",
+        "action": "impute",
+        "tool": "sklearn",
+        "params": {
+          "col_selector": "categorical",
+          "strategy": "most_frequent"
+        },
+        "example_code": "SimpleImputer(strategy='most_frequent')"
+      },
+      {
+        "id": "s3_encode",
+        "action": "encode",
+        "tool": "category_encoders",
+        "params": {
+          "col_selector": "categorical",
+          "method_by_cardinality": {
+            "low": "onehot",
+            "high": "target_encoder"
+          },
+          "high_cardinality_cols": []
+        },
+        "example_code": "TargetEncoder(cols=high_card_cols)"
+      }
+    ],
+    "example_pipeline_snippet": "from sklearn.pipeline import Pipeline\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom category_encoders import TargetEncoder\nnumeric_cols = [\"duration\", \"credit_amount\", \"installment_commitment\", \"residence_since\", \"age\", \"existing_credits\", \"num_dependents\"]\ncategorical_cols = [\"checking_status\", \"credit_history\", \"purpose\", \"savings_status\", \"employment\", \"personal_status\", \"other_parties\", \"property_magnitude\", \"other_payment_plans\", \"housing\", \"job\", \"own_telephone\", \"foreign_worker\"]\nhigh_card_cols = []\nlow_card_cols = [c for c in categorical_cols if c not in high_card_cols]\nnum_pipe = Pipeline([('impute', SimpleImputer(strategy='median')), ('scale', StandardScaler())])\nlow_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', OneHotEncoder(handle_unknown='ignore', sparse_output=False))])\nhigh_cat_pipe = Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', TargetEncoder(cols=high_card_cols))])\npreproc = ColumnTransformer([\n    ('num', num_pipe, numeric_cols),\n    ('low_cat', low_cat_pipe, low_card_cols),\n    ('high_cat', high_cat_pipe, high_card_cols),\n])",
+    "frameworks_recommended": [
+      "pandas",
+      "scikit-learn",
+      "category_encoders",
+      "mlflow"
+    ],
+    "rationale": "Rules selected to stabilize training and control dimensionality while preserving signal. Temporal features are expanded when datetime columns exist to capture seasonality.",
+    "estimated_complexity": "medium",
+    "confidence": 0.9,
+    "task_type": "classification",
+    "numeric_columns": [
+      "duration",
+      "credit_amount",
+      "installment_commitment",
+      "residence_since",
+      "age",
+      "existing_credits",
+      "num_dependents"
+    ],
+    "categorical_columns": [
+      "checking_status",
+      "credit_history",
+      "purpose",
+      "savings_status",
+      "employment",
+      "personal_status",
+      "other_parties",
+      "property_magnitude",
+      "other_payment_plans",
+      "housing",
+      "job",
+      "own_telephone",
+      "foreign_worker"
+    ],
+    "datetime_columns": [],
+    "text_columns": [],
+    "high_cardinality_cols": [],
+    "low_card_cols": [
+      "checking_status",
+      "credit_history",
+      "purpose",
+      "savings_status",
+      "employment",
+      "personal_status",
+      "other_parties",
+      "property_magnitude",
+      "other_payment_plans",
+      "housing",
+      "job",
+      "own_telephone",
+      "foreign_worker"
+    ],
+    "recommended_split": "stratified"
+  },
+  "code_agent_recommendation": {
+    "summary": "See preprocessing_recipe. Use provided steps/columns; fall back to conservative pipeline if confidence < 0.7.",
+    "recommended_artifacts": {
+      "preprocessing_recipe_key": "preprocessing_recipe",
+      "validation_report_key": "validation_report",
+      "metafeatures_key": "metafeatures",
+      "manifest_key": "manifest"
+    }
+  },
+  "run_metadata": {
+    "run_id": "43a037a6f56a4ac7a3e60f7d6e85fe75",
+    "artifact_uri": "file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/mlruns/0/43a037a6f56a4ac7a3e60f7d6e85fe75/artifacts",
+    "start_time": "2025-11-13T13:43:35.334541+00:00",
+    "end_time": "2025-11-13T13:43:42.310334+00:00",
+    "status": "FINISHED",
+    "dataset_id": "openml_31",
+    "validation_report_url": "file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/processed/aetherml/openml%3A31/20251113_134334/validation_report.json",
+    "metafeatures_url": "file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/processed/aetherml/openml%3A31/20251113_134334/metafeatures.json",
+    "preprocessing_recipe_url": "file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/processed/aetherml/openml%3A31/20251113_134334/preprocessing_recipe.json",
+    "generated_by": "data_agent_v0.2",
+    "recommendation_source": "rules"
+  }
+}
