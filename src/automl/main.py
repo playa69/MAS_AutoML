@@ -86,6 +86,7 @@ class AutoML:
             - models_list=None
             - blend=False
             - stack=False
+            - timeout=60 (timeout для моделей, которые его поддерживают, например TabularLama)
     n_jobs, optional
         Number of cores for parallel computations, by default 1
     random_state, optional
