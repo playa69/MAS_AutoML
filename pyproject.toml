@@ -1,3 +1,10 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [project]
 name = "mas-automl"
 version = "0.1.0"
@@ -37,6 +44,9 @@ dependencies = [
   "lightgbm>=4.6.0",
   "xgboost>=2.1.4",
   "lightautoml>=0.2.7",
+  "numba>=0.62.1",
+  "polars>=1.35.2",
+  "feature-engine>=1.9.3",
 ]
 
 [project.optional-dependencies]
@@ -79,6 +89,12 @@ addopts = "--maxfail=1 --disable-warnings"
 
 [dependency-groups]
 dev = [
+    "clearml>=2.0.2",
     "ipykernel>=7.1.0",
+    "ipywidgets>=8.1.8",
+    "kaggle>=1.7.4.5",
+    "pytest>=8.4.2",
+    "pytest-testmon>=2.1.4",
+    "pytest-xdist>=3.8.0",
 ]
 
