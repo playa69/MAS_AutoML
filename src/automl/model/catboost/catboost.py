@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from catboost import CatBoostClassifier as CBClass
 from catboost import CatBoostRegressor as CBReg
 from catboost import Pool
@@ -72,11 +73,31 @@ class CatBoostBase(BaseModel):
     
     def _prepare(self, X: FeaturesType, y: TargetType = None, categorical_feature: Optional[List[Union[str, int]]] = None):
         X, y = self._prepare_data(X, y, categorical_feature)
-        self.cat_features = self.categorical_feature
-        if self.categorical_feature:
-            filtered_columns = X.select_dtypes(exclude=['object', 'int']).columns
-            cast_columns = list(set(self.categorical_feature) & set(filtered_columns))
-            X[cast_columns] = X[cast_columns].astype(str)
+        
+        # Auto-detect all categorical columns (including dtype 'category' and 'object')
+        if isinstance(X, pd.DataFrame):
+            # Find all categorical columns
+            cat_dtype_cols = X.select_dtypes(include=['category', 'object']).columns.tolist()
+            # Combine with explicitly provided categorical features
+            explicit_cat = self.categorical_feature or []
+            # Get all categorical columns (union of auto-detected and explicit)
+            all_cat_cols = list(set(cat_dtype_cols + explicit_cat))
+            # Filter to only columns that exist in X
+            all_cat_cols = [col for col in all_cat_cols if col in X.columns]
+            # Update categorical_feature to include all detected categorical columns
+            self.categorical_feature = all_cat_cols
+            self.cat_features = all_cat_cols
+            
+            # Convert non-object categorical columns to string for CatBoost
+            if self.categorical_feature:
+                filtered_columns = X.select_dtypes(exclude=['object', 'int']).columns
+                cast_columns = list(set(self.categorical_feature) & set(filtered_columns))
+                if cast_columns:
+                    X[cast_columns] = X[cast_columns].astype(str)
+        else:
+            # If X is not a DataFrame, use the explicitly provided categorical features
+            self.cat_features = self.categorical_feature or []
+        
         if y is not None:
             if self.model_type == "classification":
                 self.n_classes = np.unique(y).shape[0]

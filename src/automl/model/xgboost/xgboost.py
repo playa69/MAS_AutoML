@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.utils import compute_sample_weight
 import xgboost as xgb
 
@@ -71,7 +72,29 @@ class XGBBase(BaseModel):
     
     def _prepare(self, X: FeaturesType, y: Optional[TargetType] = None, categorical_feature: Optional[List[str]] = None):
         X, y = self._prepare_data(X, y, categorical_feature or [])
-        X.loc[:, self.categorical_feature] = X[self.categorical_feature].astype("category")
+        
+        # Auto-detect all categorical columns (including dtype 'category' and 'object')
+        if isinstance(X, pd.DataFrame):
+            # Find all object dtype columns (these need to be converted to category)
+            object_cols = X.select_dtypes(include=['object']).columns.tolist()
+            # Find all category dtype columns (already correct)
+            category_cols = X.select_dtypes(include=['category']).columns.tolist()
+            # Combine with explicitly provided categorical features
+            explicit_cat = self.categorical_feature or []
+            # Get all categorical columns (union of auto-detected and explicit)
+            all_cat_cols = list(set(object_cols + category_cols + explicit_cat))
+            # Filter to only columns that exist in X
+            all_cat_cols = [col for col in all_cat_cols if col in X.columns]
+            # Update categorical_feature to include all detected categorical columns
+            self.categorical_feature = all_cat_cols
+            
+            # Convert all object dtype columns to category dtype for XGBoost
+            # Convert each column individually to ensure in-place modification
+            if object_cols:
+                for col in object_cols:
+                    if col in X.columns:
+                        X[col] = pd.Categorical(X[col])
+        
         if y is not None:
             if self.model_type == "classification":
                 self.num_class = np.unique(y).shape[0]
