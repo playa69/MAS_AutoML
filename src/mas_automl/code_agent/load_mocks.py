@@ -18,12 +18,13 @@ def _load_json(filename: str) -> Dict[str, Any]:
         return json.load(file)
 
 
-def load_mock_inputs() -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
-    """Загружает описания данных, метаданные и реестр фреймворков."""
+def load_mock_inputs() -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+    """Загружает описания данных, метаданные, реестр фреймворков и финальные данные."""
     data_analyze = _load_json("data_analyze.json")
     metadata_analyze = _load_json("metadata_analyze.json")
     framework_registry = _load_json("framework_registry.json")
-    return data_analyze, metadata_analyze, framework_registry
+    final_data = _load_json("code_agent_recommendation.json")
+    return data_analyze, metadata_analyze, framework_registry, final_data
 
 
 __all__ = ["load_mock_inputs"]

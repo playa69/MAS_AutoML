@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
@@ -10,9 +11,11 @@ if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parents[2]))
     from mas_automl.code_agent.load_mocks import load_mock_inputs  # type: ignore
     from mas_automl.code_agent.openai_wraper import LLMClient, LLMConfig  # type: ignore
+    from mas_automl.code_agent.execnet_gateway import PythonSandboxClient, SandboxResult  # type: ignore
 else:
     from .load_mocks import load_mock_inputs
     from .openai_wraper import LLMClient, LLMConfig
+    from .execnet_gateway import PythonSandboxClient, SandboxResult
 
 DEFAULT_MAX_ITERATIONS = 3
 
@@ -25,12 +28,32 @@ class PipelineResult:
     tests_passed: bool
     iterations: int
     feedback: str
+    predict_path: str | None = None
 
 
-def run_pipeline(max_iterations: int = DEFAULT_MAX_ITERATIONS, llm: LLMClient | None = None) -> PipelineResult:
+def run_pipeline(
+    max_iterations: int = DEFAULT_MAX_ITERATIONS,
+    llm: LLMClient | None = None,
+    csv_path: str | None = None,
+    output_dir: str | None = None,
+) -> PipelineResult:
     """Основной сценарий: загрузка моков → выбор фреймворка → кодогенерация → проверка."""
-    data_analysis, metadata, registry = load_mock_inputs()
+    data_analysis, metadata, registry, final_data = load_mock_inputs()
     llm = llm or LLMClient(LLMConfig())
+
+    # Получаем путь к CSV файлу
+    if csv_path is None:
+        csv_path = final_data.get("manifest", {}).get("local_path")
+        if csv_path is None:
+            csv_path = metadata.get("local_path")
+    
+    if csv_path is None:
+        raise ValueError("Не указан путь к CSV файлу и не найден в метаданных")
+
+    # Создаем директорию для сохранения предиктов
+    if output_dir is None:
+        output_dir = str(Path(csv_path).parent / "predictions")
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     framework, reason = choose_framework(data_analysis, metadata, registry, llm)
 
@@ -38,10 +61,13 @@ def run_pipeline(max_iterations: int = DEFAULT_MAX_ITERATIONS, llm: LLMClient | 
     code = ""
     tests_passed = False
     iteration = 0
+    predict_path = None
 
     for iteration in range(1, max_iterations + 1):
-        code = generate_code(framework, llm, iteration, feedback)
-        tests_passed, feedback = evaluate_code(code, framework)
+        code = generate_code(framework, llm, iteration, feedback, final_data)
+        tests_passed, feedback, predict_path = evaluate_code(
+            code, framework, csv_path, output_dir, iteration, final_data
+        )
         if tests_passed:
             break
 
@@ -52,6 +78,7 @@ def run_pipeline(max_iterations: int = DEFAULT_MAX_ITERATIONS, llm: LLMClient | 
         tests_passed=tests_passed,
         iterations=iteration,
         feedback=feedback,
+        predict_path=predict_path,
     )
 
 
@@ -100,32 +127,159 @@ def choose_framework(
     return framework_name, reason
 
 
-def generate_code(framework: str, llm: LLMClient, iteration: int, feedback: str) -> str:
+def generate_code(
+    framework: str, llm: LLMClient, iteration: int, feedback: str, final_data: Dict[str, Any] | None = None
+) -> str:
+    """Генерирует код на scikit-learn для обучения модели."""
+    preprocessing_info = ""
+    if final_data:
+        preprocessing_recipe = final_data.get("preprocessing_recipe", {})
+        if preprocessing_recipe:
+            preprocessing_info = (
+                f"\n\nИнформация о препроцессинге:\n"
+                f"- Числовые колонки: {preprocessing_recipe.get('numeric_columns', [])}\n"
+                f"- Категориальные колонки: {preprocessing_recipe.get('categorical_columns', [])}\n"
+                f"- Тип задачи: {preprocessing_recipe.get('task_type', 'classification')}\n"
+            )
+    
     prompt = (
-        f"Итерация {iteration}. Напиши компактную функцию train_model(...) для фреймворка {framework}. "
-        "Функция должна принимать train_df, test_df и label, вызывать обучение и возвращать обученную сущность. "
-        "Если есть обратная связь от тестов, учти её.\n"
-        f"Обратная связь: {feedback or 'нет'}\n"
-        "Верни только код функции и необходимые импорты (без пояснений)."
+        f"Итерация {iteration}. Напиши компактную функцию train_model(...) используя scikit-learn>=1.3. "
+        "Функция должна принимать train_df (pandas DataFrame), test_df (pandas DataFrame) и label (имя целевой колонки). "
+        "Функция должна:\n"
+        "1. Подготовить данные (обработка категориальных признаков, масштабирование числовых)\n"
+        "2. Обучить модель классификации (используй RandomForestClassifier или GradientBoostingClassifier)\n"
+        "3. Сделать предсказания на test_df\n"
+        "4. Вернуть обученную модель (sklearn estimator)\n"
+        f"{preprocessing_info}"
+        f"Обратная связь от предыдущих тестов: {feedback or 'нет'}\n"
+        "Верни только код функции и необходимые импорты (без пояснений). Используй scikit-learn>=1.3."
     )
-    fallback_code = _fallback_code_template(framework)
+    fallback_code = _fallback_code_template_sklearn(final_data)
     raw_code = llm.chat(prompt, fallback=fallback_code)
     return _extract_code(raw_code) or fallback_code
 
 
-def evaluate_code(code: str, framework: str) -> Tuple[bool, str]:
-    """Простейшие эвристические проверки вместо реальных тестов."""
-    code_lower = code.lower()
-    framework_token = framework.split()[0].lower()
+def evaluate_code(
+    code: str,
+    framework: str,
+    csv_path: str,
+    output_dir: str,
+    iteration: int,
+    final_data: Dict[str, Any] | None = None,
+) -> Tuple[bool, str, str | None]:
+    """
+    Выполняет код в песочнице, тестирует функцию train_model и сохраняет предикты.
+    Возвращает (tests_passed, feedback, predict_path).
+    """
+    sandbox = PythonSandboxClient.get()
+    
+    # Получаем информацию о датасете
+    target_column = "class"
+    if final_data:
+        target_column = final_data.get("manifest", {}).get("target_column", "class")
+    
+    # Подготавливаем код для выполнения
+    test_code = f"""
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
 
-    if framework_token not in code_lower:
-        return False, f"В коде должно быть упоминание {framework}."
-    if "def train_model" not in code:
-        return False, "Ожидается функция train_model(...)."
-    if "fit" not in code_lower and "train" not in code_lower:
-        return False, "Код должен вызывать обучение (fit/train)."
+# Загружаем данные
+df = pd.read_csv(r'{csv_path}')
+print(f"Загружено строк: {{len(df)}}")
 
-    return True, "Проверки пройдены."
+# Разделяем на train и test
+from sklearn.model_selection import train_test_split
+train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['{target_column}'])
+print(f"Train: {{len(train_df)}}, Test: {{len(test_df)}}")
+
+# Генерированный код пользователя
+{code}
+
+# Выполняем функцию
+try:
+    model = train_model(train_df, test_df, '{target_column}')
+    print("Модель обучена успешно")
+    
+    # Делаем предсказания
+    X_test = test_df.drop(columns=['{target_column}'])
+    predictions = model.predict(X_test)
+    print(f"Предсказания получены, форма: {{predictions.shape}}")
+    
+    # Сохраняем предикты
+    output_path = Path(r'{output_dir}')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    predict_file = output_path / f'predictions_iter{iteration}_{{timestamp}}.csv'
+    
+    predict_df = pd.DataFrame({{
+        'prediction': predictions,
+        'true_label': test_df['{target_column}'].values
+    }})
+    predict_df.to_csv(predict_file, index=False)
+    print(f"Предикты сохранены в: {{predict_file}}")
+    
+    # Простые проверки
+    errors = []
+    if len(predictions) != len(test_df):
+        errors.append(f"Количество предсказаний {{len(predictions)}} не совпадает с размером test {{len(test_df)}}")
+    
+    if not hasattr(model, 'predict'):
+        errors.append("Модель не имеет метода predict")
+    
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+    
+    result = {{"ok": True, "predict_path": str(predict_file), "message": "Все проверки пройдены"}}
+    
+except Exception as e:
+    import traceback
+    result = {{"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dumps(result, ensure_ascii=False))
+print("RESULT_END")
+"""
+    
+    # Выполняем код в песочнице
+    result = sandbox.run(test_code)
+    
+    if not result.ok:
+        feedback = f"Ошибка выполнения: {result.stderr}\n{result.stdout}"
+        return False, feedback, None
+    
+    # Парсим результат из stdout
+    try:
+        stdout = result.stdout
+        # Ищем маркеры RESULT_START и RESULT_END
+        if "RESULT_START" in stdout and "RESULT_END" in stdout:
+            start_idx = stdout.find("RESULT_START") + len("RESULT_START")
+            end_idx = stdout.find("RESULT_END")
+            result_json = stdout[start_idx:end_idx].strip()
+            result_dict = json.loads(result_json)
+        else:
+            # Fallback: пытаемся найти JSON в stdout
+            import re
+            json_match = re.search(r'\{[^{}]*"ok"[^{}]*\}', stdout)
+            if json_match:
+                result_dict = json.loads(json_match.group())
+            else:
+                result_dict = {"ok": False, "message": "Не удалось найти результат в stdout"}
+    except Exception as e:
+        feedback = f"Ошибка парсинга результата: {e}\nStdout: {result.stdout}\nStderr: {result.stderr}"
+        return False, feedback, None
+    
+    if result_dict.get("ok", False):
+        predict_path = result_dict.get("predict_path")
+        message = result_dict.get("message", "Проверки пройдены")
+        return True, message, predict_path
+    else:
+        error_msg = result_dict.get("message", "Неизвестная ошибка")
+        traceback_info = result_dict.get("traceback", "")
+        feedback = f"Тесты не пройдены: {error_msg}\n{traceback_info}"
+        return False, feedback, None
 
 
 def _fallback_framework_choice(metadata: Dict[str, Any], registry: Dict[str, str]) -> str:
@@ -141,43 +295,58 @@ def _fallback_framework_choice(metadata: Dict[str, Any], registry: Dict[str, str
     return next(iter(registry.keys()))
 
 
-def _fallback_code_template(framework: str) -> str:
-    name = framework.lower()
-    if "autogluon" in name:
-        return (
-            "import pandas as pd\n"
-            "from autogluon.tabular import TabularPredictor\n\n"
-            "def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, label: str) -> TabularPredictor:\n"
-            "    predictor = TabularPredictor(label=label)\n"
-            "    predictor.fit(train_data=train_df, presets='medium_quality', time_limit=60)\n"
-            "    predictor.evaluate(test_df, silent=True)\n"
-            "    return predictor\n"
-        )
-    if "lightautoml" in name:
-        return (
-            "import pandas as pd\n"
-            "from lightautoml.automl.presets.tabular_presets import TabularAutoML\n"
-            "from lightautoml.tasks import Task\n\n"
-            "def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, label: str):\n"
-            "    task = Task('binary')\n"
-            "    automl = TabularAutoML(task=task, timeout=300)\n"
-            "    automl.fit_predict(train_df, roles={'target': label})\n"
-            "    return automl\n"
-        )
-    if "h2o" in name:
-        return (
-            "import h2o\n"
-            "from h2o.automl import H2OAutoML\n\n"
-            "def train_model(train_df, test_df, label):\n"
-            "    h2o.init()\n"
-            "    train_hf = h2o.H2OFrame(train_df)\n"
-            "    aml = H2OAutoML(max_runtime_secs=120)\n"
-            "    aml.train(y=label, training_frame=train_hf)\n"
-            "    return aml\n"
-        )
+def _fallback_code_template_sklearn(final_data: Dict[str, Any] | None = None) -> str:
+    """Шаблон кода на scikit-learn для fallback."""
+    numeric_cols = ["duration", "credit_amount", "installment_commitment", "residence_since", "age", "existing_credits", "num_dependents"]
+    categorical_cols = ["checking_status", "credit_history", "purpose", "savings_status", "employment", "personal_status", "other_parties", "property_magnitude", "other_payment_plans", "housing", "job", "own_telephone", "foreign_worker"]
+    
+    if final_data:
+        preprocessing_recipe = final_data.get("preprocessing_recipe", {})
+        if preprocessing_recipe:
+            numeric_cols = preprocessing_recipe.get("numeric_columns", numeric_cols)
+            categorical_cols = preprocessing_recipe.get("categorical_columns", categorical_cols)
+    
     return (
-        "def train_model(train_df, test_df, label):\n"
-        f"    raise NotImplementedError('Неизвестный фреймворк: {framework}')\n"
+        "import pandas as pd\n"
+        "import numpy as np\n"
+        "from sklearn.compose import ColumnTransformer\n"
+        "from sklearn.pipeline import Pipeline\n"
+        "from sklearn.preprocessing import StandardScaler, OneHotEncoder\n"
+        "from sklearn.impute import SimpleImputer\n"
+        "from sklearn.ensemble import RandomForestClassifier\n\n"
+        f"numeric_cols = {numeric_cols}\n"
+        f"categorical_cols = {categorical_cols}\n\n"
+        "def train_model(train_df: pd.DataFrame, test_df: pd.DataFrame, label: str):\n"
+        "    # Подготовка признаков\n"
+        "    numeric_transformer = Pipeline(steps=[\n"
+        "        ('imputer', SimpleImputer(strategy='median')),\n"
+        "        ('scaler', StandardScaler())\n"
+        "    ])\n"
+        "    categorical_transformer = Pipeline(steps=[\n"
+        "        ('imputer', SimpleImputer(strategy='most_frequent')),\n"
+        "        ('encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False))\n"
+        "    ])\n"
+        "    preprocessor = ColumnTransformer(\n"
+        "        transformers=[\n"
+        "            ('num', numeric_transformer, numeric_cols),\n"
+        "            ('cat', categorical_transformer, categorical_cols)\n"
+        "        ]\n"
+        "    )\n"
+        "    \n"
+        "    # Подготовка данных\n"
+        "    X_train = train_df.drop(columns=[label])\n"
+        "    y_train = train_df[label]\n"
+        "    \n"
+        "    # Создание пайплайна\n"
+        "    model = Pipeline(steps=[\n"
+        "        ('preprocessor', preprocessor),\n"
+        "        ('classifier', RandomForestClassifier(n_estimators=100, random_state=42, max_depth=10))\n"
+        "    ])\n"
+        "    \n"
+        "    # Обучение\n"
+        "    model.fit(X_train, y_train)\n"
+        "    \n"
+        "    return model\n"
     )
 
 
@@ -199,6 +368,7 @@ __all__ = [
     "choose_framework",
     "generate_code",
     "evaluate_code",
+    "PythonSandboxClient",
 ]
 
 
