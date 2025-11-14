@@ -1,12 +1,12 @@
 import execnet
 import textwrap
-
+import sys
 
 class PythonSandbox:
     """Песочница на execnet с одним интерпретатором (сохраняет окружение)."""
 
     def __init__(self):
-        self.gw = execnet.makegateway("popen//python=python3")
+        self.gw = execnet.makegateway(f"popen//python={sys.executable}")
         self.channel = self.gw.remote_exec(textwrap.dedent("""
             import sys, io, traceback, builtins
 
@@ -28,7 +28,7 @@ class PythonSandbox:
 
                 # Возвращаем результат
                 channel.send(result)
-        """))
+        """)) 
 
     def run(self, code: str):
         """Выполняет код в существующем окружении."""
@@ -43,12 +43,12 @@ class PythonSandbox:
 sandbox = PythonSandbox()
 
 # Загружаем зависимости один раз
-print(sandbox.run("import pandas as pd; print('✅ pandas ready')"))
+print(sandbox.run("from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate; print('✅ LANGCHAIN ready')"))
 
-# Теперь можем использовать pd без переимпорта
-print(sandbox.run("df = pd.DataFrame({'x':[1,2,3]}); print(df.describe())"))
+# # Теперь можем использовать pd без переимпорта
+# print(sandbox.run("df = pd.DataFrame({'x':[1,2,3]}); print(df.describe())"))
 
-# Следующий код видит df
-print(sandbox.run("print('Mean:', df['x'].mean())"))
+# # Следующий код видит df
+# print(sandbox.run("print('Mean:', df['x'].mean())"))
 
 sandbox.close()
