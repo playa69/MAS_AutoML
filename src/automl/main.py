@@ -6,8 +6,10 @@ from automl.feature_processing import (
     PreprocessingPipeline,
     ValTestsPipeline,
 )
-from .loggers import enable_logging_to_file
+from .loggers import enable_logging_to_file, get_logger
 from .model import AutoModel
+
+log = get_logger(__name__)
 
 FEATURE_SELECTIONS_MAPPING = {
     "CatboostByShap": CatboostShapFeatureSelector,
@@ -41,7 +43,7 @@ class AutoML:
             - corr_coef_methods=['pearson', 'spearman']
             - corr_selection_method="missing_values"
             - oe_min_freq=0.1
-            - obj_encoders = ['oe', 'ohe', 'mte']
+            - obj_encoders = ['oe', 'ohe']
             - num_encoder = "ss"
             - verbose=True
     use_val_test_pipeline, optional
@@ -86,6 +88,7 @@ class AutoML:
             - models_list=None
             - blend=False
             - stack=False
+            - timeout=60 (timeout для моделей, которые его поддерживают, например TabularLama)
     n_jobs, optional
         Number of cores for parallel computations, by default 1
     random_state, optional
@@ -188,14 +191,19 @@ class AutoML:
                 X_train.iloc[-max_obs_for_preproc:], y_train[-max_obs_for_preproc:]
             )
             X_train = self.preprocessing_pipeline.transform(X_train)
-            X_test = self.preprocessing_pipeline.transform(X_test)
+            if X_test is not None:
+                X_test = self.preprocessing_pipeline.transform(X_test)
 
         if self.val_test_pipeline is not None:
-            self.val_test_pipeline.fit(
-                X_train.iloc[-max_obs_for_preproc:], X_test.iloc[-max_obs_for_preproc:]
-            )
-            X_train = self.val_test_pipeline.transform(X_train)
-            X_test = self.val_test_pipeline.transform(X_test)
+            if X_test is not None:
+                self.val_test_pipeline.fit(
+                    X_train.iloc[-max_obs_for_preproc:], X_test.iloc[-max_obs_for_preproc:]
+                )
+                X_train = self.val_test_pipeline.transform(X_train)
+                X_test = self.val_test_pipeline.transform(X_test)
+            else:
+                # If X_test is None, we can't fit val_test_pipeline, so skip it
+                log.warning("X_test is None, skipping val_test_pipeline", msg_type="fit")
 
         categorical_features = X_train.columns[
             (X_train.columns.str.startswith("OneHotEncoder"))
@@ -209,7 +217,8 @@ class AutoML:
                 categorical_features=categorical_features,
             )
             X_train = self.feature_selector.transform(X_train)
-            X_test = self.feature_selector.transform(X_test)
+            if X_test is not None:
+                X_test = self.feature_selector.transform(X_test)
 
             categorical_features = np.intersect1d(
                 categorical_features, X_train.columns.tolist()

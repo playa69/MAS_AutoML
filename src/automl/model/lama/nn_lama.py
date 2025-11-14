@@ -1,9 +1,6 @@
 import warnings
 
 import numpy as np
-from lightautoml.automl.presets.tabular_presets import TabularAutoML
-from lightautoml.tasks import Task
-from lightautoml.validation.np_iterators import TimeSeriesIterator
 from torch import set_num_threads as set_num_threads_torch
 
 from ...loggers import get_logger
@@ -52,6 +49,11 @@ class TabularLamaNN(BaseModel):
         set_num_threads_torch(self.n_jobs)
 
     def fit(self, X: FeaturesType, y: TargetType, categorical_features=[]):
+        # Lazy import to avoid log_calls compatibility issues with object class
+        from lightautoml.automl.presets.tabular_presets import TabularAutoML
+        from lightautoml.tasks import Task
+        from lightautoml.validation.np_iterators import TimeSeriesIterator
+        
         log.info(f"Fitting {self.name}", msg_type="start")
 
         self.categorical_features = categorical_features
