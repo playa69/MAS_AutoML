@@ -6,24 +6,23 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
-from langchain_community.chat_models import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+try:
+    from openai import OpenAI  # type: ignore
+except Exception:  # pragma: no cover - библиотека может отсутствовать в окружении
+    OpenAI = None  # type: ignore
 
 
 @dataclass
 class LLMConfig:
-    #model: str = "deepseek/deepseek-chat-v3.1:free"
+    model: str = "gpt-4o-mini"
     temperature: float = 0.0
 
 
 class LLMClient:
-    """Обёртка над LangChain ChatOpenAI (OpenRouter совместимый клиент) с fallback-логикой."""
+    """Простой обёртки над OpenAI API с fallback-логикой."""
 
     def __init__(self, config: Optional[LLMConfig] = None) -> None:
         _load_env_file()
-        print("🔑 OPENAI_API_KEY =", os.getenv("MAS_LLM__API_KEY")[:7])
-        print("🌐 BASE_URL =", os.getenv("MAS_LLM__BASE_URL"))
-
         self.config = config or LLMConfig()
         api_key = (
             os.getenv("OPENAI_API_KEY")
@@ -31,57 +30,36 @@ class LLMClient:
             or os.getenv("OPENROUTER_API_KEY")
         )
         base_url = os.getenv("OPENAI_BASE_URL") or os.getenv("MAS_LLM__BASE_URL")
-
-        self._client: ChatOpenAI | None = None
-        model_from_env = os.getenv("MAS_LLM__MODEL")
-        if model_from_env:
-            self.config.model = model_from_env
-
-        if api_key:
-            client_kwargs: dict[str, Any] = {
-                "model": self.config.model,
-                "temperature": self.config.temperature,
-                "openai_api_key": api_key,
-                "openai_api_base": base_url or "https://openrouter.ai/api/v1",
-
-            }
-            print(f"KWARGS - {client_kwargs}")
+        self._client: Any | None = None
+        if OpenAI is not None and api_key:
+            client_kwargs: dict[str, Any] = {"api_key": api_key}
+            if base_url:
+                client_kwargs["base_url"] = base_url
             try:
-                self._client = ChatOpenAI(**client_kwargs)
-                print("✅ ChatOpenAI клиент инициализирован для OpenRouter")
-            except Exception as e:
-                import traceback
-                print("❌ Ошибка инициализации клиента:", repr(e))
-                traceback.print_exc()
+                self._client = OpenAI(**client_kwargs)  # type: ignore[call-arg]
+            except Exception:  # pragma: no cover - падение клиента
                 self._client = None
 
-    def chat(
-        self,
-        prompt: str,
-        *,
-        system: str | None = None,
-        fallback: str = "",
-        temperature: float | None = None,
-    ) -> str:
+    def chat(self, prompt: str, *, system: str | None = None, fallback: str = "", temperature: float | None = None) -> str:
+        temperature = temperature if temperature is not None else self.config.temperature
         if self._client is None:
             return fallback or self._default_fallback(prompt)
 
-        messages = []
+        messages: list[dict[str, str]] = []
         if system:
-            messages.append(SystemMessage(content=system))
-        messages.append(HumanMessage(content=prompt))
-
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
         try:
-            llm = self._client.bind(temperature=temperature or self.config.temperature)
-            response = llm.invoke(messages)
-            content = getattr(response, "content", None)
-            if not content:
+            response = self._client.chat.completions.create(  # type: ignore[attr-defined]
+                model=self.config.model,
+                messages=messages,
+                temperature=temperature,
+            )
+            content = response.choices[0].message.content  # type: ignore[index]
+            if content is None:
                 raise ValueError("LLM вернул пустой ответ.")
             return content.strip()
-        except Exception as e:
-            import traceback
-            print("❌ Ошибка при вызове ChatOpenAI:", repr(e))
-            traceback.print_exc()
+        except Exception:  # pragma: no cover - сетевые ошибки, отсутствие модели и т.п.
             return fallback or self._default_fallback(prompt)
 
     def _default_fallback(self, prompt: str) -> str:
@@ -114,32 +92,9 @@ def _load_env_file() -> None:
         key, value = line.split("=", 1)
         key = key.strip()
         value = value.strip().strip('"').strip("'")
-        os.environ[key] = value  # <-- ВАЖНО! заменяем setdefault()
+        os.environ.setdefault(key, value)
 
     os.environ[env_loaded_flag] = "1"
 
 
 __all__ = ["LLMClient", "LLMConfig"]
-
-if __name__ == "__main__":
-    print("🚀 Старт диагностики LLMClient")
-    try:
-        client = LLMClient(LLMConfig())
-        print("✅ LLMClient создан.")
-    except Exception as e:
-        print("❌ Ошибка при создании LLMClient:", repr(e))
-        raise SystemExit(1)
-
-    print("\n🔍 Проверяем объект клиента:")
-    print("   _client =", type(getattr(client, "_client", None)).__name__)
-
-    if client._client is None:
-        print("⚠️  Клиент не инициализирован. Проверь API_KEY и BASE_URL.")
-        raise SystemExit(2)
-
-    print("\n💬 Пробуем простой запрос к модели...")
-    try:
-        reply = client.chat("Скажи 'тест связи'")
-        print("✅ Ответ от модели:", repr(reply))
-    except Exception as e:
-        print("❌ Ошибка при вызове chat():", repr(e))

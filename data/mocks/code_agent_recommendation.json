@@ -3,8 +3,8 @@
     "dataset_id": "openml_31",
     "source_url": "openml:data_id=31",
     "commit": null,
-    "local_path": "/Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/amlb/openml_31/data.csv",
-    "shape": [
+    "local_path": "C:\\Users\\User1\\Desktop\\ITMO_bootcamp\\data\\datasets\\openml_31_credit-g.csv",
+    "shape": [ 
       1000,
       21
     ],
@@ -81,7 +81,7 @@
       "dataset_id": "openml_31",
       "source_url": "openml:data_id=31",
       "commit": null,
-      "local_path": "/Users/sergeykudriashov/itmo_autods/MAS_AutoML/data/amlb/openml_31/data.csv",
+      "local_path":"C:\\Users\\User1\\Desktop\\ITMO_bootcamp\\data\\datasets\\openml_31_credit-g.csv",
       "shape": [
         1000,
         21
