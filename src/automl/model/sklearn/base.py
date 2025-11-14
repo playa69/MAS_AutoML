@@ -1,7 +1,9 @@
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import cross_validate
 from sklearn.base import BaseEstimator
 from sklearn.metrics import get_scorer
+from sklearn.preprocessing import OrdinalEncoder
 
 from typing import Any, Optional, List, Dict, Union
 from ...loggers import get_logger
@@ -50,7 +52,8 @@ class SKBase(BaseModel):
         if isinstance(self.eval_metric, str):
             self.eval_metric = get_scorer(self.eval_metric)
         
-        self._not_inner_model_params += ['eval_metric', 'num_class', 'device_type']
+        self._not_inner_model_params += ['eval_metric', 'num_class', 'device_type', 'label_encoders']
+        self.label_encoders: Dict[str, OrdinalEncoder] = {}
 
     def _prepare(
         self, 
@@ -59,6 +62,59 @@ class SKBase(BaseModel):
         categorical_feature: Optional[List[str]] = None
         ):
         X, y = self._prepare_data(X, y, categorical_feature)
+        
+        # Encode categorical/string features for sklearn models
+        if isinstance(X, pd.DataFrame):
+            # Find columns that need encoding (object/category dtype or string values)
+            cols_to_encode = []
+            for col in X.columns:
+                if pd.api.types.is_object_dtype(X[col]) or pd.api.types.is_categorical_dtype(X[col]):
+                    cols_to_encode.append(col)
+                else:
+                    # Check if column contains non-numeric values
+                    try:
+                        pd.to_numeric(X[col], errors='raise')
+                    except (ValueError, TypeError):
+                        cols_to_encode.append(col)
+            
+            # Encode categorical columns
+            if cols_to_encode:
+                X_encoded = X.copy()
+                for col in cols_to_encode:
+                    if col not in self.label_encoders:
+                        # Create encoder for this column
+                        encoder = OrdinalEncoder(
+                            handle_unknown='use_encoded_value',
+                            unknown_value=-1,
+                            encoded_missing_value=-1
+                        )
+                        # Fit on current data
+                        encoder.fit(X_encoded[[col]])
+                        self.label_encoders[col] = encoder
+                    else:
+                        encoder = self.label_encoders[col]
+                    
+                    # Transform the column
+                    encoded_values = encoder.transform(X_encoded[[col]])
+                    X_encoded[col] = encoded_values.flatten()
+                
+                X = X_encoded
+            
+            # Convert to numpy array for sklearn models
+            try:
+                X = X.to_numpy(dtype=np.float32, na_value=np.nan)
+            except (ValueError, TypeError):
+                # Fallback: convert without specifying dtype
+                X = X.to_numpy()
+        elif isinstance(X, np.ndarray):
+            # Already a numpy array, ensure it's float32
+            if X.dtype != np.float32:
+                try:
+                    X = X.astype(np.float32)
+                except (ValueError, TypeError):
+                    # If conversion fails, keep original dtype
+                    pass
+        
         if y is not None:
             if self.model_type == "classification":
                 self.num_class = np.unique(y).shape[0]

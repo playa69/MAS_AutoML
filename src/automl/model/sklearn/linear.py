@@ -51,11 +51,11 @@ class LogisticRegression(SLLinearBase):
             ])
         
         if params['solver'] == 'saga':
-            params['penalty'] = trial.suggest_categorical("penalty", ['none', 'l2', 'l1', 'elasticnet',])
+            params['penalty'] = trial.suggest_categorical("penalty", [None, 'l2', 'l1', 'elasticnet',])
         elif params['solver'] == 'liblinear':
             params['penalty'] = trial.suggest_categorical("penalty", ['l2', 'l1',])
         else:
-            params['penalty'] = trial.suggest_categorical("penalty", ['l2', 'none',])
+            params['penalty'] = trial.suggest_categorical("penalty", ['l2', None,])
         if params['penalty'] == 'elasticnet':
             params['l1_ratio'] = trial.suggest_float('l1_ratio', 0.0, 1.0)
 

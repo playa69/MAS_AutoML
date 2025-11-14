@@ -1,11 +1,10 @@
 import inspect
 
 from sklearn.metrics import get_scorer as sk_get_scorer
-# from sklearn.metrics import get_scorer_names
-from sklearn.metrics import SCORERS
+from sklearn.metrics import get_scorer_names as sk_get_scorer_names
 
 def get_scorer_names():
-    return list(SCORERS.keys())
+    return sk_get_scorer_names()
 
 class ScorerWrapper:
     def __init__(self, scorer, greater_is_better: bool = True, metric_name: str = ""):
