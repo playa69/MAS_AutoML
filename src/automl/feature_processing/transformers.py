@@ -11,8 +11,6 @@ from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import mean_absolute_error
 from catboost import CatBoostClassifier, Pool
-from lightautoml.automl.presets.tabular_presets import TabularAutoML
-from lightautoml.tasks import Task
 from multiprocessing import cpu_count
 from .CustomMetrics import regression_roc_auc_score
 from ..loggers import get_logger
@@ -253,6 +251,9 @@ class FeatureSelectionTransformer(BaseEstimator, TransformerMixin):
         return metric_train, metric_test
  
     def train_lama_model(self, train, test=None):
+        # Lazy import to avoid log_calls compatibility issues with object class
+        from lightautoml.automl.presets.tabular_presets import TabularAutoML
+        from lightautoml.tasks import Task
  
         cv_param = 4 if train.shape[0] // 5000 > 3 else 3
         automl = TabularAutoML(

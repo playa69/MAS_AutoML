@@ -2,12 +2,6 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from lightautoml.automl.presets.tabular_presets import (
-    TabularAutoML,
-    TabularUtilizedAutoML,
-)
-from lightautoml.tasks import Task
-from lightautoml.validation.np_iterators import TimeSeriesIterator
 from torch import set_num_threads as set_num_threads_torch
 
 from ...loggers import get_logger
@@ -73,6 +67,10 @@ class TabularLamaBase(BaseModel):
         return X
         
     def fit(self, X: FeaturesType, y: TargetType, categorical_feature: Optional[List[Union[str, int]]] = None):
+        # Lazy import to avoid log_calls compatibility issues with object class
+        from lightautoml.tasks import Task
+        from lightautoml.validation.np_iterators import TimeSeriesIterator
+        
         log.info(f"Fitting {self.name}", msg_type="start")
 
         data, _ = self._prepare(X, y, categorical_feature)
@@ -170,6 +168,9 @@ class TabularLamaClassification(TabularLamaBase):
         eval_metric: Optional[Union[str, Callable]] = None,
         **kwargs,
     ):
+        # Lazy import to avoid log_calls compatibility issues with object class
+        from lightautoml.automl.presets.tabular_presets import TabularAutoML
+        
         super().__init__(
             model_type='classification',
             random_state=random_state,
@@ -198,6 +199,9 @@ class TabularLamaRegression(TabularLamaBase):
         eval_metric: Optional[Union[str, Callable]] = None,
         **kwargs,
     ):
+        # Lazy import to avoid log_calls compatibility issues with object class
+        from lightautoml.automl.presets.tabular_presets import TabularAutoML
+        
         super().__init__(
             model_type='regression',
             random_state=random_state,
@@ -226,6 +230,9 @@ class TabularLamaUtilizedClassification(TabularLamaBase):
         eval_metric: Optional[Union[str, Callable]] = None,
         **kwargs,
     ):
+        # Lazy import to avoid log_calls compatibility issues with object class
+        from lightautoml.automl.presets.tabular_presets import TabularUtilizedAutoML
+        
         super().__init__(
             model_type='classification',
             random_state=random_state,
@@ -255,6 +262,9 @@ class TabularLamaUtilizedRegression(TabularLamaBase):
         eval_metric: Optional[Union[str, Callable]] = None,
         **kwargs,
     ):
+        # Lazy import to avoid log_calls compatibility issues with object class
+        from lightautoml.automl.presets.tabular_presets import TabularUtilizedAutoML
+        
         super().__init__(
             model_type='regression',
             random_state=random_state,
