@@ -30,3 +30,6 @@ data/datasets/.metadata/*
 uv.lock
 
 src/mas_automl.egg-info/*
+src/mas_automl.egg-info/PKG-INFO
+src/mas_automl.egg-info/requires.txt
+src/mas_automl.egg-info/SOURCES.txt
