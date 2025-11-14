@@ -61,6 +61,7 @@ def choose_framework(
     data_analysis: Dict[str, Any],
     metadata: Dict[str, Any],
     registry: Dict[str, str],
+    final: Dict[str, Any],
     llm: LLMClient,
 ) -> Tuple[str, str]:
     """
@@ -82,6 +83,7 @@ def choose_framework(
 
     metadata_json = json.dumps(metadata, ensure_ascii=False, indent=2)
     analysis_json = json.dumps(data_analysis, ensure_ascii=False, indent=2)
+    final_json = json.dumps(final, ensure_ascii=False, indent=2)
 
     # --- Prompt шаблон ---
     prompt = ChatPromptTemplate.from_messages([
@@ -92,8 +94,7 @@ def choose_framework(
         ),
         HumanMessagePromptTemplate.from_template(
             "Вот анализ датасета и метаданные:\n\n"
-            "### 📊 Data Analysis\n{analysis_json}\n\n"
-            "### 🧾 Metadata\n{metadata_json}\n\n"
+            "### 📊 Data Analysis\n{final_json}\n\n"
             "### ⚙️ Доступные AutoML фреймворки\n{frameworks_list}\n\n"
             "Поясни свой выбор кратко, но содержательно. "
             "Если несколько подходят, выбери наиболее универсальный и стабильный вариант. "
@@ -104,8 +105,7 @@ def choose_framework(
   
     # --- Формируем финальный текст промпта ---
     formatted_prompt = prompt.format_messages(
-        analysis_json=analysis_json,
-        metadata_json=metadata_json,
+        final_json=final_json,
         frameworks_list=frameworks_list,
     )
 
