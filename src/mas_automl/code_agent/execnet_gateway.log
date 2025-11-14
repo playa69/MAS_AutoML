@@ -1,0 +1,384 @@
+2025-11-14 15:23:35,785 [INFO] Creating new execnet gateway with python=c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Scripts\python.exe
+2025-11-14 15:23:35,859 [INFO] Gateway and channel created.
+2025-11-14 15:33:19,151 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    predict_df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv'predict_file, index=False)
+    print(f"Предикты сохранены в: {predict_file}")
+
+    # Простые проверки
+    errors = []
+    if len(predictions) != len(test_df):
+        errors.append(f"Количество предсказаний {len(predictions)} не совпадает с размером test {len(test_df)}")
+
+    if not hasattr(model, 'predict'):
+        errors.append("Модель не имеет метода predict")
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": str(predict_file), "message": "Все проверки пройдены"}
+
+except Excepti...[truncated]
+2025-11-14 15:33:19,152 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:33:19,153 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:33:19,153 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 17
+    predict_df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv'predict_file, index=False)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: invalid syntax. Perhaps you forgot a comma?
+2025-11-14 15:35:28,391 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    predict_df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST', index=False)
+    print(f"Предикты сохранены в: {predict_file}")
+
+    # Простые проверки
+    errors = []
+    if len(predictions) != len(test_df):
+        errors.append(f"Количество предсказаний {len(predictions)} не совпадает с размером test {len(test_df)}")
+
+    if not hasattr(model, 'predict'):
+        errors.append("Модель не имеет метода predict")
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": str(predict_file), "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+...[truncated]
+2025-11-14 15:35:28,392 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:35:28,869 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:35:28,869 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": false, "predict_path": null, "message": "name 'predict_df' is not defined", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 17, in <module>\nNameError: name 'predict_df' is not defined\n"}
+RESULT_END
+2025-11-14 15:36:49,789 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST', index=False)
+    print(f"Предикты сохранены в: {CSV_PATH_TO_PREDICT}")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": str(predict_file), "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dumps(result, ensure_ascii=False))
+print("RESULT_END")
+2025-11-14 15:36:49,790 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:36:49,813 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:36:49,814 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": false, "predict_path": null, "message": "[Errno 13] Permission denied: 'C:\\\\Users\\\\User1\\\\Desktop\\\\ITMO_bootcamp\\\\data\\\\datasets\\\\TEST'", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 17, in <module>\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\util\\_decorators.py\", line 333, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\core\\generic.py\", line 3989, in to_csv\n    return DataFrameRenderer(formatter).to_csv(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\format.py\", line 1014, in to_csv\n    csv_formatter.save()\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\csvs.py\", line 251, in save\n    with get_handle(\n         ^^^^^^^^^^^\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\io\\common.py\", line 873, in get_handle\n    handle = open(\n             ^^^^^\nPermissionError: [Errno 13] Permission denied: 'C:\\\\Users\\\\User1\\\\Desktop\\\\ITMO_bootcamp\\\\data\\\\datasets\\\\TEST'\n"}
+RESULT_END
+2025-11-14 15:38:14,233 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv', index=False)
+    print(f"Предикты сохранены в: {CSV_PATH_TO_PREDICT}")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": str(predict_file), "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dumps(result, ensure_ascii=False))
+print("RESULT_EN...[truncated]
+2025-11-14 15:38:14,234 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:38:14,245 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:38:14,246 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": false, "predict_path": null, "message": "name 'CSV_PATH_TO_PREDICT' is not defined", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 18, in <module>\nNameError: name 'CSV_PATH_TO_PREDICT' is not defined\n"}
+RESULT_END
+2025-11-14 15:39:30,757 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv', index=False)
+    print(f"Предикты сохранены в: C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": str(predict_file), "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dumps...[truncated]
+2025-11-14 15:39:30,757 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:39:30,758 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:39:30,759 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 18
+    print(f"Предикты сохранены в: C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv")
+                                                                                                      ^
+SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 186-187: truncated \UXXXXXXXX escape
+2025-11-14 15:39:58,100 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv', index=False)
+    # print(f"Предикты сохранены в: C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": str(predict_file), "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dum...[truncated]
+2025-11-14 15:39:58,101 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:39:58,113 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:39:58,114 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": false, "predict_path": null, "message": "name 'predict_file' is not defined", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 26, in <module>\nNameError: name 'predict_file' is not defined\n"}
+RESULT_END
+2025-11-14 15:40:44,145 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv', index=False)
+    # print(f"Предикты сохранены в: C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": "mock", "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dumps(result, ...[truncated]
+2025-11-14 15:40:44,146 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:40:44,156 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:40:44,158 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": true, "predict_path": "mock", "message": "Все проверки пройдены"}
+RESULT_END
+2025-11-14 15:42:39,146 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv', index=False)
+    # print(f"Предикты сохранены в: C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": "mock", "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dumps(result, ...[truncated]
+2025-11-14 15:42:39,147 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:42:39,158 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:42:39,159 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": true, "predict_path": "mock", "message": "Все проверки пройдены"}
+RESULT_END
+2025-11-14 15:43:08,847 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv', index=False)
+    # print(f"Предикты сохранены в: C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": "mock", "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в формате JSON для парсинга
+print("RESULT_START")
+print(json.dumps(result, ...[truncated]
+2025-11-14 15:43:08,848 [DEBUG] Code sent, waiting for result...
+2025-11-14 15:43:08,857 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 15:43:08,858 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": true, "predict_path": "mock", "message": "Все проверки пройдены"}
+RESULT_END

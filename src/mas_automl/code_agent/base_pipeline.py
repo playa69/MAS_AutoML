@@ -177,7 +177,7 @@ def evaluate_code(
     target_column = "class"
     if final_data:
         target_column = final_data.get("manifest", {}).get("target_column", "class")
-    
+    print("1 - start testing")
     # Подготавливаем код для выполнения
     test_code = f"""
 import pandas as pd
@@ -245,11 +245,13 @@ print("RESULT_END")
     
     # Выполняем код в песочнице
     result = sandbox.run(test_code)
-    
+    print("2 - end testing")
+  
     if not result.ok:
         feedback = f"Ошибка выполнения: {result.stderr}\n{result.stdout}"
         return False, feedback, None
-    
+    print("3 - try gateway")
+
     # Парсим результат из stdout
     try:
         stdout = result.stdout
@@ -270,7 +272,8 @@ print("RESULT_END")
     except Exception as e:
         feedback = f"Ошибка парсинга результата: {e}\nStdout: {result.stdout}\nStderr: {result.stderr}"
         return False, feedback, None
-    
+    print("4 - end gateway")
+
     if result_dict.get("ok", False):
         predict_path = result_dict.get("predict_path")
         message = result_dict.get("message", "Проверки пройдены")

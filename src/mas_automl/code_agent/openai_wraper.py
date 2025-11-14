@@ -33,6 +33,7 @@ class LLMClient:
         self._client: Any | None = None
         if OpenAI is not None and api_key:
             client_kwargs: dict[str, Any] = {"api_key": api_key}
+            print(client_kwargs)
             if base_url:
                 client_kwargs["base_url"] = base_url
             try:
