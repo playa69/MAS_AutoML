@@ -19,7 +19,6 @@ else:
 
 DEFAULT_MAX_ITERATIONS = 3
 
-
 @dataclass
 class PipelineResult:
     framework: str
