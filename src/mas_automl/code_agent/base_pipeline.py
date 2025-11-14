@@ -129,7 +129,7 @@ def choose_framework(
 def generate_code(
     framework: str, llm: LLMClient, iteration: int, feedback: str, final_data: Dict[str, Any] | None = None
 ) -> str:
-    """Генерирует код на scikit-learn для обучения модели."""
+    """Генерирует код для обучения модели."""
     preprocessing_info = ""
     if final_data:
         preprocessing_recipe = final_data.get("preprocessing_recipe", {})
@@ -141,18 +141,82 @@ def generate_code(
                 f"- Тип задачи: {preprocessing_recipe.get('task_type', 'classification')}\n"
             )
     
-    prompt = (
-        f"Итерация {iteration}. Напиши компактную функцию train_model(...) используя scikit-learn>=1.3. "
-        "Функция должна принимать train_df (pandas DataFrame), test_df (pandas DataFrame) и label (имя целевой колонки). "
-        "Функция должна:\n"
-        "1. Подготовить данные (обработка категориальных признаков, масштабирование числовых)\n"
-        "2. Обучить модель классификации (используй RandomForestClassifier или GradientBoostingClassifier)\n"
-        "3. Сделать предсказания на test_df\n"
-        "4. Вернуть обученную модель (sklearn estimator)\n"
-        f"{preprocessing_info}"
-        f"Обратная связь от предыдущих тестов: {feedback or 'нет'}\n"
-        "Верни только код функции и необходимые импорты (без пояснений). Используй scikit-learn>=1.3."
-    )
+    prompt = f"""
+    Итерация {iteration}.
+    Ты — опытный Data Scientist. Нужно написать компактную корректную функцию train_model(...),
+    которая использует МОЙ AutoML (он уже импортирован; НЕ нужно определять класс AutoML).
+
+    Функция train_model должна:
+
+    1) Принимать:
+        - train_df : pandas.DataFrame
+        - test_df  : pandas.DataFrame
+        - label : str
+
+    2) Правильно разделять данные:
+        X = train_df.drop(columns=[label])
+        y = train_df[label]
+
+    3) Инициализировать AutoML строго такими параметрами:
+        automl = AutoML(
+            task='classification',
+            use_preprocessing_pipeline=False,
+            feature_selector_type=None,
+            use_val_test_pipeline=False,
+            auto_models_init_kwargs={
+                "metric": "roc_auc",
+                "time_series": False,
+                "models_list": ["linear", "forests", "boostings"],
+                "blend": True,
+                "stack": True,
+                "n_splits": 10,
+            },
+            n_jobs=3,
+            random_state=0,
+        )
+
+    4) Обучить модель:
+        automl = automl.fit(
+            X, y,
+            auto_model_fit_kwargs={"tuning_timeout": 10}
+        )
+
+        — НЕ использовать sklearn в любом виде
+        — НЕ выполнять вручную препроцессинг, кодирование, скейлинг
+
+    5) Получить предсказания:
+        preds = automl.predict(test_df)
+
+    6) Вычислить:
+        score = automl.auto_model.best_score
+        test_predictions = preds[:, 1]
+
+    7) Вернуть:
+        return automl, score, test_predictions
+
+    Если передано preprocessing_recipe — учитывай его только как информационный блок,
+    но НЕ применяй его в коде.
+
+    Информация о препроцессинге:
+    {preprocessing_info}
+
+    ПРИМЕР КАК ИСПОЛЬЗУЕТСЯ МОЙ AutoML (НЕ копировать, только ориентир):
+
+        automl = AutoML(...)
+        automl = automl.fit(X, y, auto_model_fit_kwargs={"tuning_timeout": 10})
+        score = automl.auto_model.best_score
+        test_predictions = automl.predict(X)[:, 1]
+
+    Требования к выводу:
+    - Вернуть СТРОГО: только код функции + необходимые импорты.
+    - Никакого текста, комментариев, markdown.
+    - Функция должна называться train_model.
+    - Переменные: score и test_predictions — обязательны.
+
+    Обратная связь:
+    {feedback or "нет"}
+    """
+
     fallback_code = _fallback_code_template_sklearn(final_data)
     raw_code = llm.chat(prompt, fallback=fallback_code)
     return _extract_code(raw_code) or fallback_code
