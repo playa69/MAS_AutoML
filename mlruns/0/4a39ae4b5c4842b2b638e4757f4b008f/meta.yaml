@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/sergeykudriashov/itmo_autods/MAS_AutoML/mlruns/0/4a39ae4b5c4842b2b638e4757f4b008f/artifacts
+end_time: 1763040978228
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4a39ae4b5c4842b2b638e4757f4b008f
+run_name: aetherml:openml:31
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763040978217
+status: 3
+tags: []
+user_id: sergeykudriashov

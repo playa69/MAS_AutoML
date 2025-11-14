@@ -15,6 +15,7 @@ from sklearn.preprocessing import KBinsDiscretizer
 from .base import Agent, AgentContext, AgentMessage
 from ..services.artifacts import ArtifactStore
 from ..services.datasets import DatasetManifest, load_amlb_dataset
+from ..services.llm import try_generate_code_agent_recommendation_llm
 
 
 DEFAULTS = {
@@ -334,15 +335,19 @@ class DataAgent(Agent):
         run_metadata = self._register_run(dataset_id, task_type, run_loc.root)
         run_metadata_url = self.artifacts.save_json(run_loc, "run_metadata.json", run_metadata)
 
-        # 6) Recommendations via standalone function and save as preprocessing_recipe.json
-        recommendation = generate_code_agent_recommendation(
-            validation_report,
-            metafeatures,
-            {
-                "col_missing_threshold": self.cfg.col_missing_threshold,
-                "high_cardinality_ratio": self.cfg.high_cardinality_ratio,
-            },
-        )
+        # 6) Recommendations: try LLM (if configured), otherwise rule-based
+        rec_source = "llm"
+        recommendation = try_generate_code_agent_recommendation_llm(validation_report, metafeatures)
+        if recommendation is None:
+            rec_source = "rules"
+            recommendation = generate_code_agent_recommendation(
+                validation_report,
+                metafeatures,
+                {
+                    "col_missing_threshold": self.cfg.col_missing_threshold,
+                    "high_cardinality_ratio": self.cfg.high_cardinality_ratio,
+                },
+            )
         preprocessing_recipe_url = self.artifacts.save_json(
             run_loc, "preprocessing_recipe.json", recommendation
         )
@@ -391,6 +396,7 @@ class DataAgent(Agent):
                 "metafeatures_url": metafeatures_url,
                 "preprocessing_recipe_url": preprocessing_recipe_url,
                 "generated_by": "data_agent_v0.2",
+                "recommendation_source": rec_source,
             }
         )
         combined_bundle = {
@@ -427,6 +433,7 @@ class DataAgent(Agent):
             "run_metadata_url": run_metadata_url,
             "preprocessing_recipe_url": preprocessing_recipe_url,
             "code_agent_recommendation_url": code_agent_recommendation_url,
+            "recommendation_source": rec_source,
             "warnings": warnings,
             "errors": [],
             "timestamp": _now_iso(),

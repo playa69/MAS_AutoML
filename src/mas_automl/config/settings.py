@@ -30,17 +30,23 @@ class BenchmarkConfig(BaseSettings):
 class LLMConfig(BaseSettings):
     """Настройки для подключения LLM."""
 
-    provider: Literal["openai", "azure", "anthropic", "local"] = "openai"
+    provider: Literal["openai", "azure", "anthropic", "gigachat", "local"] = "openai"
     model: str = "gpt-4.1"
     temperature: float = 0.2
     max_tokens: int = 2048
     api_key: str | None = None
+    base_url: str | None = None
 
 
 class MASSettings(BaseSettings):
     """Высокоуровневые настройки мультиагентной системы."""
 
-    model_config = SettingsConfigDict(env_prefix="MAS_", env_file=".env", env_nested_delimiter="__")
+    model_config = SettingsConfigDict(
+        env_prefix="MAS_",
+        env_file=".env",
+        env_nested_delimiter="__",
+        extra="ignore",  # игнорируем лишние ключи из .env (например, GIGACHAT_API_KEY)
+    )
 
     frameworks: list[AutoMLFrameworkConfig] = Field(
         default_factory=lambda: [
