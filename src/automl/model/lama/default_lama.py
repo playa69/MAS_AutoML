@@ -33,6 +33,7 @@ class TabularLamaBase(BaseModel):
         n_jobs: Optional[int] = None,
         n_splits: int = 5,
         eval_metric: Optional[Union[str, Callable]] = None,
+        use_algos: Optional[List[List[str]]] = None,
         **kwargs,
     ):
         super().__init__(
@@ -53,9 +54,10 @@ class TabularLamaBase(BaseModel):
             
         self.timeout = timeout
         self.n_folds = n_splits
+        self.use_algos = use_algos  # None по умолчанию - используются все алгоритмы LightAutoML. Можно ограничить, например: [["linear_l2"]] или [["linear_l2"], ["lgb"]]
         
         set_num_threads_torch(self.n_jobs)
-        self._not_inner_model_params += ['timeout', 'task', 'n_folds', 'model_class']
+        self._not_inner_model_params += ['timeout', 'task', 'n_folds', 'model_class', 'use_algos']
         
     def _prepare(self, X: FeaturesType, y: Optional[TargetType] = None, categorical_feature: Optional[List[Union[str, int]]] = None):
         seed_everything(self.random_state)
@@ -75,20 +77,27 @@ class TabularLamaBase(BaseModel):
 
         data, _ = self._prepare(X, y, categorical_feature)
 
-        model = self.model_class(
-            task=Task(
+        # Подготовка параметров для TabularAutoML
+        model_kwargs = {
+            "task": Task(
                 name=self.task,
                 # metric=self.scorer.score,
                 # greater_is_better=self.scorer.greater_is_better,
             ),
-            timeout=2 * self.timeout,
-            cpu_limit=self.n_jobs,
-            reader_params={
+            "timeout": self.timeout,  # Убрано умножение на 2 для более точного контроля времени
+            "cpu_limit": self.n_jobs,
+            "reader_params": {
                 "n_jobs": 1,
                 "cv": self.n_folds,
                 "random_state": self.random_state,
             },
-        )
+        }
+        
+        # Добавляем general_params только если указаны алгоритмы для ограничения
+        if self.use_algos is not None:
+            model_kwargs["general_params"] = {"use_algos": self.use_algos}
+
+        model = self.model_class(**model_kwargs)
 
         roles = {"target": "target"}
         if len(self.categorical_feature) > 0:

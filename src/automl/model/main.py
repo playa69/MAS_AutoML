@@ -28,7 +28,10 @@ class AutoModel:
         stack=False,
         n_jobs: int = 6,
         random_state: int = 42,
+        n_splits: int = None,  # Должен быть передан явно из auto_models_init_kwargs
     ):
+        if n_splits is None:
+            raise ValueError("n_splits must be explicitly provided in auto_models_init_kwargs")
         self.task = task
         self.metric = metric
         self.scorer = get_scorer(metric)
@@ -48,6 +51,8 @@ class AutoModel:
             "n_jobs": self.n_jobs,
             "random_state": self.random_state,
             "time_series": self.time_series,
+            "n_splits": n_splits,
+            # timeout будет установлен в tune() из tuning_timeout
         }
 
         # some tough logic to properly init models
