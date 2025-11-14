@@ -23,7 +23,7 @@ class PreprocessingPipeline(Pipeline):
                  outlier_capping_method='gaussian', outlier_cap_tail='both',
                  corr_ts = 0.8, corr_coef_methods=['pearson', 'spearman'],
                  corr_selection_method="missing_values", oe_min_freq=0.1,
-                 obj_encoders = ['oe', 'ohe', 'mte'],
+                 obj_encoders = ['oe', 'ohe'],
                  num_encoder = "ss",
                  random_state=42,
                  verbose=True):
@@ -98,7 +98,14 @@ class PreprocessingPipeline(Pipeline):
             'min_max':('MinMaxScaler', MinMaxScaler(clip=True), make_column_selector(dtype_include="number")),
             }
         if self.pipe_steps[0] == 'all' or 'object_encoder' in self.pipe_steps:
-            obj_transformers = [obj_encoders_dict[obj_encoder] for obj_encoder in self.obj_encoders]
+            # Filter out unsupported encoders
+            supported_encoders = [enc for enc in self.obj_encoders if enc in obj_encoders_dict]
+            unsupported_encoders = [enc for enc in self.obj_encoders if enc not in obj_encoders_dict]
+            if unsupported_encoders:
+                log.warning(f"Unsupported encoders {unsupported_encoders} will be skipped. Available encoders: {list(obj_encoders_dict.keys())}", msg_type="preprocessing")
+            if not supported_encoders:
+                raise ValueError(f"No supported encoders found. Available encoders: {list(obj_encoders_dict.keys())}")
+            obj_transformers = [obj_encoders_dict[obj_encoder] for obj_encoder in supported_encoders]
         num_transformer = [num_encoders_dict[self.num_encoder]]
         
         feature_encoder = ColumnTransformer(
