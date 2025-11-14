@@ -382,3 +382,48 @@ print(json.dumps(result, ...[truncated]
 RESULT_START
 {"ok": true, "predict_path": "mock", "message": "Все проверки пройдены"}
 RESULT_END
+2025-11-14 19:04:38,553 [INFO] Creating new execnet gateway with python=c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Scripts\python.exe
+2025-11-14 19:04:38,645 [INFO] Gateway and channel created.
+2025-11-14 19:04:38,646 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+
+# Генерированный код пользователя
+print(5)
+
+# Выполняем функцию
+try:
+    df['pred'] = np.random.rand(len(df))
+    df.to_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv', index=False)
+    # print(f"Предикты сохранены в: C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test1__.csv")
+
+    # Простые проверки
+    errors = []
+
+    if errors and any(errors):
+        raise ValueError("; ".join([e for e in errors if e]))
+
+    result = {"ok": True, "predict_path": "mock", "message": "Все проверки пройдены"}
+
+except Exception as e:
+    import traceback
+    result = {"ok": False, "predict_path": None, "message": str(e), "traceback": traceback.format_exc()}
+
+# Выводим результат в форма...[truncated]
+2025-11-14 19:04:38,647 [DEBUG] Code sent, waiting for result...
+2025-11-14 19:04:44,692 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-14 19:04:44,693 [INFO] [sandbox stdout]
+Загружено строк: 1000
+5
+RESULT_START
+{"ok": true, "predict_path": "mock", "message": "Все проверки пройдены"}
+RESULT_END
