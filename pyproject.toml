@@ -51,6 +51,7 @@ dependencies = [
   "nltk>=3.9.2",
   "gensim>=4.4.0",
   "psutil>=7.0.0",
+  "tavily-python>=0.3",
 ]
 
 [project.optional-dependencies]
