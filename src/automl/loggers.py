@@ -2,10 +2,17 @@ import logging
 import sys
 from datetime import datetime
 from contextlib import ContextDecorator
+import threading
 
 import optuna
 
 from .constants import PATH, is_ml_data_dir_exists, create_ml_data_dir
+
+# Store original streams to prevent recursion
+_original_stdout = sys.stdout
+_original_stderr = sys.stderr
+_recursion_lock = threading.Lock()
+_recursion_depth = 0
 
 
 def center_text(text: str, max_len: int = 12):
@@ -52,27 +59,34 @@ class LoggingStream:
         self.logger = logger
         self.buffer = ""
         self.first_line_flag = True
-        self._writing = False  # Простой флаг для предотвращения рекурсии
 
     def write(self, message):
-        # Если уже пишем, выводим напрямую в stdout чтобы избежать рекурсии
-        if self._writing:
-            sys.stdout.write(message)
-            return
+        global _recursion_depth
         
-        self._writing = True
+        # If we're already in a logging context, write directly to original stderr
+        with _recursion_lock:
+            if _recursion_depth > 0:
+                _original_stderr.write(message)
+                return
+            _recursion_depth += 1
+        
         try:
             if self.first_line_flag:
-                self.logger.error(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]"))
+                # Use the underlying logger directly to avoid adapter recursion
+                underlying_logger = self.logger.logger if hasattr(self.logger, 'logger') else self.logger
+                underlying_logger.error(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]"))
                 self.first_line_flag = False
 
             self.buffer += message
 
             if self.buffer.endswith("\n"):
-                self.logger.error(self.buffer[:-1])
+                # Use the underlying logger directly to avoid adapter recursion
+                underlying_logger = self.logger.logger if hasattr(self.logger, 'logger') else self.logger
+                underlying_logger.error(self.buffer[:-1])
                 self.buffer = ""
         finally:
-            self._writing = False
+            with _recursion_lock:
+                _recursion_depth -= 1
 
     def flush(self):
         pass
@@ -94,7 +108,8 @@ def get_error_file_handler():
 
 
 def get_info_stream_handler():
-    stream_handler = logging.StreamHandler(stream=sys.stdout)
+    # Use original stdout to prevent recursion
+    stream_handler = logging.StreamHandler(stream=_original_stdout)
     stream_handler.setLevel(logging.INFO)
     stream_handler.setFormatter(logging.Formatter(_log_format))
     stream_handler.addFilter(lambda record: record.levelno == logging.INFO)
@@ -102,7 +117,8 @@ def get_info_stream_handler():
 
 
 def get_error_stream_handler():
-    stream_handler = logging.StreamHandler(stream=sys.stdout)
+    # Use original stdout to prevent recursion
+    stream_handler = logging.StreamHandler(stream=_original_stdout)
     stream_handler.setLevel(logging.WARNING)
     stream_handler.setFormatter(logging.Formatter("%(message)s"))
     return stream_handler
@@ -148,8 +164,23 @@ class LoggerWriter:
         self.logger = logger
 
     def write(self, message):
-        if message != "\n":
-            self.logger.info(message[:-1])
+        global _recursion_depth
+        
+        # If we're already in a logging context, write directly to original stdout
+        with _recursion_lock:
+            if _recursion_depth > 0:
+                _original_stdout.write(message)
+                return
+            _recursion_depth += 1
+        
+        try:
+            if message != "\n":
+                # Use the underlying logger directly to avoid adapter recursion
+                underlying_logger = self.logger.logger if hasattr(self.logger, 'logger') else self.logger
+                underlying_logger.info(message[:-1])
+        finally:
+            with _recursion_lock:
+                _recursion_depth -= 1
 
     def flush(self):
         pass

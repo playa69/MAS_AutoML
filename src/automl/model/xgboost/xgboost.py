@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.utils import compute_sample_weight
 import xgboost as xgb
+import re
 
 from typing import Any, Optional, Callable, Union, List, Dict
 from ...loggers import get_logger
@@ -70,6 +71,43 @@ class XGBBase(BaseModel):
         for k, v in kwargs.items():
             setattr(self, k, v)
     
+    @staticmethod
+    def _sanitize_feature_names(X: FeaturesType) -> FeaturesType:
+        """
+        Sanitize feature names to remove invalid characters for XGBoost.
+        XGBoost doesn't allow feature names with [, ], or < characters.
+        
+        Parameters:
+        -----------
+        X : FeaturesType
+            Input features (DataFrame or array)
+            
+        Returns:
+        --------
+        FeaturesType
+            Features with sanitized column names if DataFrame, otherwise unchanged
+        """
+        if isinstance(X, pd.DataFrame):
+            # Create a copy to avoid modifying the original
+            X_sanitized = X.copy()
+            # Replace invalid characters: [, ], <, > with underscores
+            new_columns = [re.sub(r'[\[\]<>]', '_', str(col)) for col in X_sanitized.columns]
+            
+            # Handle potential duplicates by appending numbers
+            seen = {}
+            final_columns = []
+            for col in new_columns:
+                if col in seen:
+                    seen[col] += 1
+                    final_columns.append(f"{col}_{seen[col]}")
+                else:
+                    seen[col] = 0
+                    final_columns.append(col)
+            
+            X_sanitized.columns = final_columns
+            return X_sanitized
+        return X
+    
     def _prepare(self, X: FeaturesType, y: Optional[TargetType] = None, categorical_feature: Optional[List[str]] = None):
         X, y = self._prepare_data(X, y, categorical_feature or [])
         
@@ -128,12 +166,16 @@ class XGBBase(BaseModel):
                     sample_weight = compute_sample_weight(
                         class_weight="balanced", y=y_train
                         )
+        # Sanitize feature names before creating DMatrix
+        X_train_sanitized = self._sanitize_feature_names(X_train)
+        X_test_sanitized = self._sanitize_feature_names(X_test)
+        
         dtrain = xgb.DMatrix(
-            X_train, label=y_train, 
+            X_train_sanitized, label=y_train, 
             weight=sample_weight,
             silent=True, nthread=self.nthread, enable_categorical=True,)
         dtest = xgb.DMatrix(
-            X_test, label=y_test, 
+            X_test_sanitized, label=y_test, 
             silent=True, nthread=self.nthread, enable_categorical=True,)
         
         custom_metric = None
@@ -168,8 +210,10 @@ class XGBBase(BaseModel):
                 X_test, y_test,
                 inner_params=self.inner_params)
 
+            # Sanitize feature names before creating DMatrix
+            X_test_sanitized = self._sanitize_feature_names(X_test)
             dtest = xgb.DMatrix(
-                X_test, 
+                X_test_sanitized, 
                 silent=True, 
                 nthread=self.nthread, 
                 enable_categorical=True,
@@ -297,8 +341,10 @@ class XGBBase(BaseModel):
         y_pred = np.zeros((X.shape[0], self.num_class)) if self.num_class and self.num_class > 2 \
             else np.zeros((X.shape[0],))
         
+        # Sanitize feature names before creating DMatrix
+        X_sanitized = self._sanitize_feature_names(X)
         dtest = xgb.DMatrix(
-                X, 
+                X_sanitized, 
                 silent=True, 
                 nthread=self.nthread, 
                 enable_categorical=True,

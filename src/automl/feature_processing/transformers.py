@@ -207,6 +207,15 @@ class CorrFeaturesTransformerFast(BaseEstimator, TransformerMixin):
         self.drop_corr_features = []
     
     def fit(self, X, y):
+        # Check if there are enough numeric features for correlation selection
+        # Need at least 2 numeric features to compute correlations
+        numeric_features = X.select_dtypes(include="number").columns.tolist()
+        
+        if len(numeric_features) < 2:
+            # Not enough features for correlation selection, skip this step
+            log.info(f"Skipping correlation feature selection: only {len(numeric_features)} numeric feature(s) available (need at least 2)", msg_type="preprocessing")
+            self.drop_corr_features = []
+            return self
     
         for corr_coef_method in self.corr_coef_methods:
             scs = SmartCorrelatedSelectionFast(threshold=self.corr_ts, method=corr_coef_method, selection_method=self.corr_selection_method)
@@ -220,7 +229,9 @@ class CorrFeaturesTransformerFast(BaseEstimator, TransformerMixin):
  
     def transform(self, X):
         self.drop_corr_features = list(set(self.drop_corr_features))
-        X.drop(self.drop_corr_features, axis=1, inplace=True)
+        # Only drop features if there are any to drop
+        if len(self.drop_corr_features) > 0:
+            X.drop(self.drop_corr_features, axis=1, inplace=True)
  
         return X
  

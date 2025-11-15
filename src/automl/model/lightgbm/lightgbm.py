@@ -1,5 +1,6 @@
 import lightgbm as lgb
 import numpy as np
+import pandas as pd
 
 from typing import Any, Optional, List, Dict, Callable, Union
 from ...loggers import get_logger
@@ -7,6 +8,7 @@ from ..base import BaseModel
 from ..type_hints import FeaturesType, TargetType
 from ..utils import tune_optuna
 from ..utils.model_utils import get_splitter, get_epmty_array
+from ..utils.conversions import convert_to_pandas
 
 
 log = get_logger(__name__)
@@ -97,6 +99,60 @@ class LightGBMBase(BaseModel):
         
     def _prepare(self, X: FeaturesType, y: Optional[TargetType] = None, categorical_feature: Optional[List[str]] = None):
         X, y = self._prepare_data(X, y, categorical_feature)
+        
+        # Convert object dtype columns appropriately for LightGBM
+        # LightGBM requires all columns to be numeric (int, float, bool) or categorical (string/category dtype)
+        # Object dtype columns cannot be used by LightGBM directly
+        # - If marked as categorical: convert to string (LightGBM can handle string categoricals)
+        # - If NOT marked as categorical: convert to numeric
+        # - Encoded columns (OneHotEncoder__*, OrdinalEncoder__*) should always be numeric, not categorical
+        if isinstance(X, pd.DataFrame):
+            categorical_feature_set = set(self.categorical_feature or [])
+            # Track which categorical features should be removed (encoded columns)
+            encoded_categorical_to_remove = []
+            
+            for col in X.columns:
+                if pd.api.types.is_object_dtype(X[col]):
+                    # Check if this is an encoded column (should be numeric, not categorical)
+                    is_encoded = (col.startswith("OneHotEncoder__") or 
+                                 col.startswith("OrdinalEncoder__"))
+                    
+                    if is_encoded:
+                        # Encoded columns should be numeric, remove from categorical if present
+                        if col in categorical_feature_set:
+                            encoded_categorical_to_remove.append(col)
+                        # Convert to numeric
+                        original_values = X[col].copy()
+                        try:
+                            X[col] = pd.to_numeric(X[col], errors='coerce')
+                            if X[col].isna().all():
+                                X[col] = pd.factorize(original_values)[0].astype(float)
+                            else:
+                                if X[col].isna().any():
+                                    X[col] = X[col].fillna(0)
+                        except (ValueError, TypeError):
+                            X[col] = pd.factorize(original_values)[0].astype(float)
+                    elif col in categorical_feature_set:
+                        # Categorical feature with object dtype: convert to string for LightGBM
+                        X[col] = X[col].astype(str)
+                    else:
+                        # Not categorical and not encoded: convert to numeric
+                        original_values = X[col].copy()
+                        try:
+                            X[col] = pd.to_numeric(X[col], errors='coerce')
+                            if X[col].isna().all():
+                                X[col] = pd.factorize(original_values)[0].astype(float)
+                            else:
+                                if X[col].isna().any():
+                                    X[col] = X[col].fillna(0)
+                        except (ValueError, TypeError):
+                            X[col] = pd.factorize(original_values)[0].astype(float)
+            
+            # Remove encoded columns from categorical features list
+            if encoded_categorical_to_remove:
+                self.categorical_feature = [col for col in self.categorical_feature 
+                                           if col not in encoded_categorical_to_remove]
+        
         if y is not None:
             if self.model_type == "classification":
                 self.num_class = np.unique(y).shape[0]
@@ -140,6 +196,11 @@ class LightGBMBase(BaseModel):
         X_test: FeaturesType, y_test: TargetType,
         inner_params: Dict[Any, Any] = {}
         ):
+        # Prepare data to ensure correct dtypes (convert object to numeric if needed)
+        # This is critical because preprocessing may create object dtype columns
+        X_train, y_train = self._prepare(X_train, y_train, categorical_feature=self.categorical_feature)
+        X_test, y_test = self._prepare(X_test, y_test, categorical_feature=self.categorical_feature)
+        
         train_data = lgb.Dataset(
             X_train,
             y_train,
@@ -300,7 +361,26 @@ class LightGBMBase(BaseModel):
 
     def _predict(self, X):
         """Predict on one dataset. Average all fold models"""
-        X = self._prepare(X, categorical_feature=self.categorical_feature)
+        # Filter categorical features to only those that exist in the current data
+        # and are still categorical (not converted to numeric by preprocessing)
+        # This is important because preprocessing pipeline may change the data structure
+        current_categorical_feature = None
+        if self.categorical_feature:
+            # First, convert to pandas to check data types (preserves column names if X is DataFrame)
+            X_temp = convert_to_pandas(X)
+            # Filter: only keep categorical features that exist in X and have appropriate dtype
+            valid_categorical = []
+            for col in self.categorical_feature:
+                if col in X_temp.columns:
+                    dtype = X_temp[col].dtype
+                    # Check if it's still a categorical type (not converted to numeric)
+                    # After preprocessing, categorical features might be converted to numeric
+                    # via OneHotEncoder/OrdinalEncoder, so we should not include them
+                    if pd.api.types.is_categorical_dtype(dtype) or pd.api.types.is_object_dtype(dtype):
+                        valid_categorical.append(col)
+            current_categorical_feature = valid_categorical if valid_categorical else None
+        
+        X = self._prepare(X, categorical_feature=current_categorical_feature)
         y_pred = np.zeros((X.shape[0], self.num_class)) if self.num_class and self.num_class > 2 \
             else np.zeros((X.shape[0],))
 
