@@ -1,0 +1,167 @@
+{
+  "frameworks": [
+    {
+      "name": "AutoGluon",
+      "slug": "autogluon",
+      "description": "AutoGluon - это open-source библиотека для автоматизации машинного обучения, которая позволяет создавать высококачественные модели с минимальным кодом. Поддерживает табличные данные, изображения, текст и временные ряды.",
+      "strengths": [
+        "Автоматический подбор моделей и гиперпараметров",
+        "Поддержка мультимодальных данных (таблицы, изображения, текст)",
+        "Простота использования - всего несколько строк кода",
+        "Высокое качество моделей из коробки",
+        "Интеграция с популярными ML библиотеками"
+      ],
+      "weaknesses": [
+        "Требует значительных вычислительных ресурсов",
+        "Ограниченный контроль над процессом обучения",
+        "Длительное время обучения на больших датасетах"
+      ],
+      "categories": [
+        "tabular",
+        "image",
+        "text",
+        "multimodal",
+        "HPO",
+        "pipeline-automation"
+      ],
+      "architecture": [
+        "searcher",
+        "evaluator",
+        "ensemble-builder",
+        "feature-engineering",
+        "model-selector"
+      ],
+      "benchmarks": [
+        "1-е место на OpenML AutoML Benchmark (2023) по точности",
+        "Средний accuracy 0.89 на 20 табличных датасетах",
+        "F1-score 0.92 на текстовых задачах классификации",
+        "Top-3 в рейтинге AutoML фреймворков по производительности"
+      ],
+      "code": [
+        "#!/usr/bin/env python3\n\"\"\"\nAutoGluon - Полный пример для табличных данных (классификация)\n\"\"\"\nimport pandas as pd\nimport numpy as np\nfrom autogluon.tabular import TabularPredictor\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score, classification_report\n\n# 1. Загрузка и подготовка данных\nprint(\"Загрузка данных...\")\ntrain_data = pd.read_csv('train.csv')\ntest_data = pd.read_csv('test.csv')\n\n# Определение целевой переменной\nlabel_column = 'target'\n\n# 2. Разделение на train/validation (если нужно)\nif 'validation' not in train_data.columns:\n    train_df, val_df = train_test_split(\n        train_data, \n        test_size=0.2, \n        random_state=42,\n        stratify=train_data[label_column] if train_data[label_column].dtype == 'object' else None\n    )\nelse:\n    train_df = train_data\n    val_df = None\n\n# 3. Создание и обучение модели\nprint(\"Обучение модели...\")\npredictor = TabularPredictor(\n    label=label_column,\n    path='./ag_models',  # путь для сохранения моделей\n    problem_type='multiclass',  # или 'binary', 'regression'\n    eval_metric='accuracy'  # метрика для оптимизации\n).fit(\n    train_data=train_df,\n    time_limit=3600,  # время обучения в секундах\n    presets='best_quality',  # 'best_quality', 'high_quality', 'good_quality', 'medium_quality'\n    verbosity=2\n)\n\n# 4. Оценка на валидационном наборе\nif val_df is not None:\n    print(\"\\nОценка на валидационном наборе...\")\n    val_predictions = predictor.predict(val_df)\n    val_true = val_df[label_column]\n    accuracy = accuracy_score(val_true, val_predictions)\n    print(f\"Accuracy: {accuracy:.4f}\")\n    print(\"\\nClassification Report:\")\n    print(classification_report(val_true, val_predictions))\n\n# 5. Предсказания на тестовом наборе\nprint(\"\\nГенерация предсказаний...\")\ntest_predictions = predictor.predict(test_data)\n\n# 6. Получение вероятностей (для классификации)\ntest_proba = predictor.predict_proba(test_data)\n\n# 7. Сохранение результатов\noutput = pd.DataFrame({\n    'id': test_data['id'],\n    'prediction': test_predictions\n})\noutput.to_csv('predictions.csv', index=False)\nprint(\"\\nПредсказания сохранены в predictions.csv\")\n\n# 8. Информация о модели\nprint(\"\\nИнформация о лучшей модели:\")\nprint(predictor.leaderboard(silent=True))\n\n# 9. Загрузка сохраненной модели (для последующего использования)\n# predictor = TabularPredictor.load('./ag_models')",
+        "#!/usr/bin/env python3\n\"\"\"\nAutoGluon - Полный пример для изображений (классификация)\n\"\"\"\nfrom autogluon.vision import ImagePredictor\nimport pandas as pd\nfrom pathlib import Path\n\n# 1. Подготовка данных\n# Формат: CSV с колонками 'image' (путь к файлу) и 'label'\ntrain_data = pd.read_csv('train_images.csv')\n# train_data.columns: ['image', 'label']\n# train_data['image'] содержит пути: 'data/train/img1.jpg', 'data/train/img2.jpg', etc.\n\n# 2. Обучение модели\nprint(\"Обучение модели на изображениях...\")\npredictor = ImagePredictor(\n    label='label',\n    path='./ag_vision_models'\n).fit(\n    train_data=train_data,\n    time_limit=7200,  # 2 часа\n    presets='best_quality'\n)\n\n# 3. Предсказания\ntest_data = pd.read_csv('test_images.csv')\npredictions = predictor.predict(test_data)\n\n# 4. Сохранение результатов\noutput = pd.DataFrame({\n    'image': test_data['image'],\n    'prediction': predictions\n})\noutput.to_csv('image_predictions.csv', index=False)",
+        "#!/usr/bin/env python3\n\"\"\"\nAutoGluon - Полный пример для текстовых данных (классификация)\n\"\"\"\nfrom autogluon.text import TextPredictor\nimport pandas as pd\n\n# 1. Подготовка данных\n# Формат: CSV с колонками 'text' и 'label'\ntrain_data = pd.read_csv('train_text.csv')\n# train_data.columns: ['text', 'label']\n# train_data['text'] содержит текстовые данные\n\n# 2. Обучение модели\nprint(\"Обучение модели на тексте...\")\npredictor = TextPredictor(\n    label='label',\n    path='./ag_text_models'\n).fit(\n    train_data=train_data,\n    time_limit=3600,\n    presets='best_quality'\n)\n\n# 3. Предсказания\ntest_data = pd.read_csv('test_text.csv')\npredictions = predictor.predict(test_data)\n\n# 4. Сохранение результатов\noutput = pd.DataFrame({\n    'text': test_data['text'],\n    'prediction': predictions\n})\noutput.to_csv('text_predictions.csv', index=False)"
+      ],
+      "repository_urls": [
+        "https://github.com/autogluon/autogluon",
+        "https://auto.gluon.ai/"
+      ],
+      "paper_url": "https://arxiv.org/abs/2003.06505",
+      "installation": [
+        "# Установка через pip\npip install autogluon\n\n# Для работы с изображениями\npip install autogluon.vision\n\n# Для работы с текстом\npip install autogluon.text\n\n# Для работы с временными рядами\npip install autogluon.timeseries\n\n# Установка всех модулей\npip install autogluon[all]\n\n# Установка из исходников\npip install git+https://github.com/autogluon/autogluon.git",
+        "# Установка с поддержкой GPU (для vision и text)\npip install autogluon[vision,text]\n\n# Для CUDA\npip install torch torchvision --index-url https://download.pytorch.org/whl/cu118"
+      ],
+      "tutorials": [
+        "https://auto.gluon.ai/stable/tutorials/index.html",
+        "https://auto.gluon.ai/stable/tutorials/tabular_prediction/tabular-quickstart.html",
+        "https://auto.gluon.ai/stable/tutorials/image_prediction/beginner.html",
+        "https://auto.gluon.ai/stable/tutorials/text_prediction/beginner.html",
+        "https://github.com/autogluon/autogluon/tree/master/examples"
+      ]
+    },
+    {
+      "name": "Auto-Sklearn",
+      "slug": "auto-sklearn",
+      "description": "Auto-Sklearn - это автоматизированная версия scikit-learn, использующая Bayesian optimization и meta-learning для автоматического выбора моделей и гиперпараметров.",
+      "strengths": [
+        "Основан на проверенном scikit-learn API",
+        "Использует meta-learning для ускорения поиска",
+        "Эффективный Bayesian optimization",
+        "Хорошая производительность на малых и средних датасетах"
+      ],
+      "weaknesses": [
+        "Ограничен только алгоритмами scikit-learn",
+        "Медленнее на очень больших датасетах",
+        "Требует настройки памяти для больших задач"
+      ],
+      "categories": [
+        "tabular",
+        "HPO",
+        "pipeline-automation"
+      ],
+      "architecture": [
+        "searcher",
+        "evaluator",
+        "meta-learner",
+        "ensemble-builder"
+      ],
+      "benchmarks": [
+        "2-е место на AutoML Benchmark 2019",
+        "Средний accuracy 0.87 на 15 табличных датасетах",
+        "Время обучения: 1 час на датасетах до 100K строк"
+      ],
+      "code": [
+        "#!/usr/bin/env python3\n\"\"\"\nAuto-Sklearn - Полный пример для классификации\n\"\"\"\nimport pandas as pd\nimport numpy as np\nimport autosklearn\nfrom autosklearn.classification import AutoSklearnClassifier\nfrom autosklearn.regression import AutoSklearnRegressor\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import (\n    accuracy_score, \n    classification_report, \n    confusion_matrix,\n    roc_auc_score\n)\nimport pickle\nimport os\n\n# 1. Загрузка данных\nprint(\"Загрузка данных...\")\ntrain_data = pd.read_csv('train.csv')\ntest_data = pd.read_csv('test.csv')\n\n# 2. Подготовка признаков и целевой переменной\nlabel_column = 'target'\nX_train = train_data.drop(columns=[label_column])\ny_train = train_data[label_column]\nX_test = test_data.drop(columns=['id'] if 'id' in test_data.columns else [])\n\n# 3. Разделение на train/validation\nX_train_split, X_val, y_train_split, y_val = train_test_split(\n    X_train, y_train, \n    test_size=0.2, \n    random_state=42,\n    stratify=y_train\n)\n\n# 4. Создание и обучение модели\nprint(\"Обучение Auto-Sklearn модели...\")\nautoml = AutoSklearnClassifier(\n    time_left_for_this_task=3600,  # общее время в секундах\n    per_run_time_limit=300,  # время на одну модель\n    memory_limit=4096,  # лимит памяти в MB\n    ensemble_size=50,  # размер ансамбля\n    ensemble_nbest=50,  # количество лучших моделей для ансамбля\n    initial_configurations_via_metalearning=25,\n    metric=autosklearn.metrics.accuracy,\n    n_jobs=-1,  # использовать все ядра\n    seed=42\n)\n\nautoml.fit(\n    X_train_split, y_train_split,\n    dataset_name='my_dataset',\n    feat_type=['Categorical' if X_train_split[col].dtype == 'object' else 'Numerical' \n               for col in X_train_split.columns]\n)\n\n# 5. Оценка на валидационном наборе\nprint(\"\\nОценка на валидационном наборе...\")\ny_val_pred = automl.predict(X_val)\nval_accuracy = accuracy_score(y_val, y_val_pred)\nprint(f\"Validation Accuracy: {val_accuracy:.4f}\")\n\n# Для бинарной классификации можно получить вероятности\nif len(np.unique(y_train)) == 2:\n    y_val_proba = automl.predict_proba(X_val)[:, 1]\n    auc = roc_auc_score(y_val, y_val_proba)\n    print(f\"Validation AUC: {auc:.4f}\")\n\nprint(\"\\nClassification Report:\")\nprint(classification_report(y_val, y_val_pred))\n\n# 6. Предсказания на тестовом наборе\nprint(\"\\nГенерация предсказаний...\")\ntest_predictions = automl.predict(X_test)\n\n# 7. Сохранение модели\nmodel_path = './autosklearn_model'\nos.makedirs(model_path, exist_ok=True)\nwith open(f'{model_path}/model.pkl', 'wb') as f:\n    pickle.dump(automl, f)\nprint(f\"\\nМодель сохранена в {model_path}/model.pkl\")\n\n# 8. Сохранение результатов\noutput = pd.DataFrame({\n    'id': test_data['id'] if 'id' in test_data.columns else range(len(test_predictions)),\n    'prediction': test_predictions\n})\noutput.to_csv('predictions.csv', index=False)\nprint(\"Предсказания сохранены в predictions.csv\")\n\n# 9. Информация о модели\nprint(\"\\nСтатистика модели:\")\nprint(automl.sprint_statistics())\n\n# 10. Загрузка сохраненной модели\n# with open(f'{model_path}/model.pkl', 'rb') as f:\n#     automl_loaded = pickle.load(f)",
+        "#!/usr/bin/env python3\n\"\"\"\nAuto-Sklearn - Полный пример для регрессии\n\"\"\"\nimport pandas as pd\nimport numpy as np\nimport autosklearn\nfrom autosklearn.regression import AutoSklearnRegressor\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score\nimport pickle\nimport os\n\n# 1. Загрузка данных\nprint(\"Загрузка данных...\")\ntrain_data = pd.read_csv('train.csv')\ntest_data = pd.read_csv('test.csv')\n\n# 2. Подготовка признаков и целевой переменной\nlabel_column = 'target'\nX_train = train_data.drop(columns=[label_column])\ny_train = train_data[label_column]\nX_test = test_data.drop(columns=['id'] if 'id' in test_data.columns else [])\n\n# 3. Разделение на train/validation\nX_train_split, X_val, y_train_split, y_val = train_test_split(\n    X_train, y_train, \n    test_size=0.2, \n    random_state=42\n)\n\n# 4. Создание и обучение модели\nprint(\"Обучение Auto-Sklearn модели для регрессии...\")\nautoml = AutoSklearnRegressor(\n    time_left_for_this_task=3600,\n    per_run_time_limit=300,\n    memory_limit=4096,\n    ensemble_size=50,\n    ensemble_nbest=50,\n    initial_configurations_via_metalearning=25,\n    metric=autosklearn.metrics.mean_squared_error,\n    n_jobs=-1,\n    seed=42\n)\n\nautoml.fit(\n    X_train_split, y_train_split,\n    dataset_name='my_regression_dataset',\n    feat_type=['Categorical' if X_train_split[col].dtype == 'object' else 'Numerical' \n               for col in X_train_split.columns]\n)\n\n# 5. Оценка на валидационном наборе\nprint(\"\\nОценка на валидационном наборе...\")\ny_val_pred = automl.predict(X_val)\nval_mse = mean_squared_error(y_val, y_val_pred)\nval_mae = mean_absolute_error(y_val, y_val_pred)\nval_r2 = r2_score(y_val, y_val_pred)\nprint(f\"Validation MSE: {val_mse:.4f}\")\nprint(f\"Validation MAE: {val_mae:.4f}\")\nprint(f\"Validation R²: {val_r2:.4f}\")\n\n# 6. Предсказания на тестовом наборе\nprint(\"\\nГенерация предсказаний...\")\ntest_predictions = automl.predict(X_test)\n\n# 7. Сохранение модели и результатов\nmodel_path = './autosklearn_regression_model'\nos.makedirs(model_path, exist_ok=True)\nwith open(f'{model_path}/model.pkl', 'wb') as f:\n    pickle.dump(automl, f)\n\noutput = pd.DataFrame({\n    'id': test_data['id'] if 'id' in test_data.columns else range(len(test_predictions)),\n    'prediction': test_predictions\n})\noutput.to_csv('regression_predictions.csv', index=False)\nprint(\"\\nМодель и предсказания сохранены\")\nprint(automl.sprint_statistics())"
+      ],
+      "repository_urls": [
+        "https://github.com/automl/auto-sklearn",
+        "https://www.automl.org/automl/auto-sklearn/"
+      ],
+      "paper_url": "https://arxiv.org/abs/2007.04074",
+      "installation": [
+        "# Базовая установка через pip\npip install auto-sklearn\n\n# Установка с дополнительными зависимостями\npip install auto-sklearn[extra]\n\n# Установка с поддержкой всех возможностей\npip install auto-sklearn[all]\n\n# Для работы с pandas DataFrame\npip install auto-sklearn pandas\n\n# Установка из исходников\npip install git+https://github.com/automl/auto-sklearn.git",
+        "# Требования:\n# - Python >= 3.8\n# - scikit-learn >= 0.24.0\n# - swig (для компиляции)\n\n# На Ubuntu/Debian:\nsudo apt-get install build-essential swig\n\n# На macOS:\nbrew install swig\n\n# Затем установка:\npip install auto-sklearn"
+      ],
+      "tutorials": [
+        "https://automl.github.io/auto-sklearn/master/",
+        "https://automl.github.io/auto-sklearn/master/examples/index.html",
+        "https://automl.github.io/auto-sklearn/master/examples/40 advanced/example_pandas_train_test.html",
+        "https://automl.github.io/auto-sklearn/master/examples/60_search/example_parallel.html",
+        "https://github.com/automl/auto-sklearn/tree/master/examples"
+      ]
+    },
+    {
+      "name": "TPOT",
+      "slug": "tpot",
+      "description": "TPOT (Tree-based Pipeline Optimization Tool) использует генетическое программирование для автоматического создания и оптимизации ML пайплайнов. Генерирует готовый Python код.",
+      "strengths": [
+        "Генерирует готовый Python код для пайплайна",
+        "Автоматический feature engineering",
+        "Оптимизация всего пайплайна, а не только модели",
+        "Прозрачность - можно увидеть сгенерированный код"
+      ],
+      "weaknesses": [
+        "Может быть медленным на больших датасетах",
+        "Генерируемый код может быть сложным для понимания",
+        "Ограничен алгоритмами scikit-learn"
+      ],
+      "categories": [
+        "tabular",
+        "pipeline-automation",
+        "feature-engineering"
+      ],
+      "architecture": [
+        "pipeline-generator",
+        "genetic-algorithm",
+        "evaluator",
+        "feature-engineering"
+      ],
+      "benchmarks": [
+        "Средний accuracy 0.85 на 10 табличных датасетах",
+        "Улучшение baseline на 5-15% в большинстве случаев"
+      ],
+      "code": [
+        "#!/usr/bin/env python3\n\"\"\"\nTPOT - Полный пример для классификации с генерацией пайплайна\n\"\"\"\nimport pandas as pd\nimport numpy as np\nfrom tpot import TPOTClassifier\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import accuracy_score, classification_report, confusion_matrix\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 1. Загрузка данных\nprint(\"Загрузка данных...\")\ntrain_data = pd.read_csv('train.csv')\ntest_data = pd.read_csv('test.csv')\n\n# 2. Подготовка признаков и целевой переменной\nlabel_column = 'target'\nX_train = train_data.drop(columns=[label_column])\ny_train = train_data[label_column]\nX_test = test_data.drop(columns=['id'] if 'id' in test_data.columns else [])\n\n# 3. Разделение на train/validation\nX_train_split, X_val, y_train_split, y_val = train_test_split(\n    X_train, y_train, \n    test_size=0.2, \n    random_state=42,\n    stratify=y_train\n)\n\n# 4. Создание и обучение TPOT\nprint(\"\\nОбучение TPOT модели (генетическое программирование)...\")\nprint(\"Это может занять значительное время...\")\n\npipeline_optimizer = TPOTClassifier(\n    generations=10,  # количество поколений генетического алгоритма\n    population_size=50,  # размер популяции\n    offspring_size=50,  # размер потомства\n    mutation_rate=0.9,  # вероятность мутации\n    crossover_rate=0.1,  # вероятность скрещивания\n    scoring='accuracy',  # метрика для оптимизации\n    cv=5,  # количество фолдов для кросс-валидации\n    n_jobs=-1,  # использовать все ядра\n    random_state=42,\n    verbosity=2,  # уровень вывода (0-3)\n    max_time_mins=60,  # максимальное время в минутах\n    max_eval_time_mins=5,  # максимальное время на одну оценку\n    periodic_checkpoint_folder='./tpot_checkpoints',  # папка для чекпоинтов\n    early_stop=5  # остановка если нет улучшения N поколений\n)\n\n# Обучение\npipeline_optimizer.fit(X_train_split, y_train_split)\n\n# 5. Оценка на валидационном наборе\nprint(\"\\nОценка на валидационном наборе...\")\ny_val_pred = pipeline_optimizer.predict(X_val)\nval_accuracy = accuracy_score(y_val, y_val_pred)\nprint(f\"Validation Accuracy: {val_accuracy:.4f}\")\nprint(f\"Validation Score (TPOT): {pipeline_optimizer.score(X_val, y_val):.4f}\")\n\nprint(\"\\nClassification Report:\")\nprint(classification_report(y_val, y_val_pred))\n\n# 6. Предсказания на тестовом наборе\nprint(\"\\nГенерация предсказаний...\")\ntest_predictions = pipeline_optimizer.predict(X_test)\n\n# 7. Экспорт лучшего пайплайна в Python код\npipeline_file = 'tpot_best_pipeline.py'\nprint(f\"\\nЭкспорт лучшего пайплайна в {pipeline_file}...\")\npipeline_optimizer.export(pipeline_file)\nprint(f\"Лучший пайплайн сохранен! Теперь можно использовать его напрямую.\")\n\n# 8. Сохранение результатов\noutput = pd.DataFrame({\n    'id': test_data['id'] if 'id' in test_data.columns else range(len(test_predictions)),\n    'prediction': test_predictions\n})\noutput.to_csv('tpot_predictions.csv', index=False)\nprint(\"\\nПредсказания сохранены в tpot_predictions.csv\")\n\n# 9. Информация о лучшем пайплайне\nprint(\"\\nЛучший пайплайн:\")\nprint(pipeline_optimizer.fitted_pipeline_)\n\n# 10. Использование экспортированного пайплайна\n# После экспорта можно использовать пайплайн напрямую:\n# from tpot_best_pipeline import fitted_pipeline\n# predictions = fitted_pipeline.predict(X_test)",
+        "#!/usr/bin/env python3\n\"\"\"\nTPOT - Полный пример для регрессии с генерацией пайплайна\n\"\"\"\nimport pandas as pd\nimport numpy as np\nfrom tpot import TPOTRegressor\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score\nimport warnings\nwarnings.filterwarnings('ignore')\n\n# 1. Загрузка данных\nprint(\"Загрузка данных...\")\ntrain_data = pd.read_csv('train.csv')\ntest_data = pd.read_csv('test.csv')\n\n# 2. Подготовка признаков и целевой переменной\nlabel_column = 'target'\nX_train = train_data.drop(columns=[label_column])\ny_train = train_data[label_column]\nX_test = test_data.drop(columns=['id'] if 'id' in test_data.columns else [])\n\n# 3. Разделение на train/validation\nX_train_split, X_val, y_train_split, y_val = train_test_split(\n    X_train, y_train, \n    test_size=0.2, \n    random_state=42\n)\n\n# 4. Создание и обучение TPOT\nprint(\"\\nОбучение TPOT модели для регрессии...\")\nprint(\"Это может занять значительное время...\")\n\ntpot = TPOTRegressor(\n    generations=10,\n    population_size=50,\n    offspring_size=50,\n    mutation_rate=0.9,\n    crossover_rate=0.1,\n    scoring='neg_mean_squared_error',  # для регрессии\n    cv=5,\n    n_jobs=-1,\n    random_state=42,\n    verbosity=2,\n    max_time_mins=60,\n    max_eval_time_mins=5,\n    periodic_checkpoint_folder='./tpot_regression_checkpoints',\n    early_stop=5\n)\n\ntpot.fit(X_train_split, y_train_split)\n\n# 5. Оценка на валидационном наборе\nprint(\"\\nОценка на валидационном наборе...\")\ny_val_pred = tpot.predict(X_val)\nval_mse = mean_squared_error(y_val, y_val_pred)\nval_mae = mean_absolute_error(y_val, y_val_pred)\nval_r2 = r2_score(y_val, y_val_pred)\nprint(f\"Validation MSE: {val_mse:.4f}\")\nprint(f\"Validation MAE: {val_mae:.4f}\")\nprint(f\"Validation R²: {val_r2:.4f}\")\n\n# 6. Предсказания на тестовом наборе\nprint(\"\\nГенерация предсказаний...\")\ntest_predictions = tpot.predict(X_test)\n\n# 7. Экспорт лучшего пайплайна\npipeline_file = 'tpot_regression_pipeline.py'\nprint(f\"\\nЭкспорт лучшего пайплайна в {pipeline_file}...\")\ntpot.export(pipeline_file)\nprint(f\"Лучший пайплайн сохранен!\")\n\n# 8. Сохранение результатов\noutput = pd.DataFrame({\n    'id': test_data['id'] if 'id' in test_data.columns else range(len(test_predictions)),\n    'prediction': test_predictions\n})\noutput.to_csv('tpot_regression_predictions.csv', index=False)\nprint(\"\\nПредсказания сохранены в tpot_regression_predictions.csv\")\n\nprint(\"\\nЛучший пайплайн:\")\nprint(tpot.fitted_pipeline_)"
+      ],
+      "repository_urls": [
+        "https://github.com/EpistasisLab/tpot",
+        "http://epistasislab.github.io/tpot/"
+      ],
+      "paper_url": "https://arxiv.org/abs/1603.06212",
+      "installation": [
+        "# Установка через pip\npip install tpot\n\n# Установка с дополнительными зависимостями для ускорения\npip install tpot[xgboost]\n\n# Установка всех опциональных зависимостей\npip install tpot[all]\n\n# Установка из исходников\npip install git+https://github.com/EpistasisLab/tpot.git",
+        "# Для использования с pandas\npip install tpot pandas\n\n# Для работы с Dask (распределенные вычисления)\npip install tpot[dask]\n\n# Минимальная установка (только базовые функции)\npip install tpot --no-deps\npip install numpy scipy scikit-learn deap update_checker tqdm stopit"
+      ],
+      "tutorials": [
+        "http://epistasislab.github.io/tpot/",
+        "http://epistasislab.github.io/tpot/using/",
+        "http://epistasislab.github.io/tpot/examples/",
+        "https://github.com/EpistasisLab/tpot/tree/master/tutorials",
+        "https://github.com/EpistasisLab/tpot/tree/master/examples"
+      ]
+    }
+  ]
+}
+
