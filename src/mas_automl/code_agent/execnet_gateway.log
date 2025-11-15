@@ -427,3 +427,912 @@ except Exception as e:
 RESULT_START
 {"ok": true, "predict_path": "mock", "message": "Все проверки пройдены"}
 RESULT_END
+2025-11-15 00:54:43,732 [INFO] Creating new execnet gateway with python=c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Scripts\python.exe
+2025-11-15 00:54:43,821 [INFO] Gateway and channel created.
+2025-11-15 00:54:43,822 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+X = df.drop(columns=[label])
+y = df[label]
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+        "stack": True,
+        "...[truncated]
+2025-11-15 00:54:43,822 [DEBUG] Code sent, waiting for result...
+2025-11-15 00:54:51,444 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 00:54:51,445 [INFO] [sandbox stdout]
+Загружено строк: 1000
+2025-11-15 00:54:51,446 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 18, in <module>
+NameError: name 'class_labels' is not defined
+2025-11-15 00:55:46,453 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+X = df.drop(columns=[label])
+y = df[label]
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+        "stack": True,
+        "...[truncated]
+2025-11-15 00:55:46,454 [DEBUG] Code sent, waiting for result...
+2025-11-15 00:55:46,459 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 00:55:46,460 [INFO] [sandbox stdout]
+Загружено строк: 1000
+2025-11-15 00:55:46,461 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 18, in <module>
+NameError: name 'class_labels' is not defined
+2025-11-15 00:57:54,998 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+X = df.drop(columns=[label])
+y = df[label]
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 00:57:54,999 [DEBUG] Code sent, waiting for result...
+2025-11-15 00:57:55,007 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 00:57:55,008 [INFO] [sandbox stdout]
+Загружено строк: 1000
+2025-11-15 00:57:55,009 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 19, in <module>
+NameError: name 'y' is not defined
+2025-11-15 00:59:08,117 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 00:59:08,118 [DEBUG] Code sent, waiting for result...
+2025-11-15 01:05:00,491 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 01:05:00,493 [INFO] [sandbox stdout]
+Загружено строк: 1000
+2025-11-15 01:05:00,494 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 50, in <module>
+  File "C:\Users\User1\Desktop\ITMO_bootcamp\src\automl\main.py", line 258, in predict
+    return self.auto_model.predict(X_test)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User1\Desktop\ITMO_bootcamp\src\automl\model\main.py", line 322, in predict
+    y_pred.append(self.models_list[idx].predict(X))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User1\Desktop\ITMO_bootcamp\src\automl\model\base.py", line 174, in predict
+    return self._predict(Xs)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\User1\Desktop\ITMO_bootcamp\src\automl\model\sklearn\base.py", line 215, in _predict
+    y_pred += getattr(fold_model, self.model_predict_func_name)(X)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Lib\site-packages\sklearn\ensemble\_forest.py", line 945, in predict_proba
+    X = self._validate_X_predict(X)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Lib\site-packages\sklearn\ensemble\_forest.py", line 637, in _validate_X_predict
+    X = validate_data(
+        ^^^^^^^^^^^^^^
+  File "c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Lib\site-packages\sklearn\utils\validation.py", line 2975, in validate_data
+    _check_n_features(_estimator, X, reset=reset)
+  File "c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Lib\site-packages\sklearn\utils\validation.py", line 2839, in _check_n_features
+    raise ValueError(
+ValueError: X has 21 features, but RandomForestClassifier is expecting 20 features as input.
+2025-11-15 01:17:50,847 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 01:17:50,849 [DEBUG] Code sent, waiting for result...
+2025-11-15 01:24:41,860 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 01:24:41,861 [INFO] [sandbox stdout]
+Загружено строк: 1000
+RESULT_START
+{"ok": false, "predict_path": null, "message": "name 'test_prediction' is not defined", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 57, in <module>\nNameError: name 'test_prediction' is not defined\n"}
+RESULT_END
+2025-11-15 12:16:39,475 [INFO] Creating new execnet gateway with python=c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Scripts\python.exe
+2025-11-15 12:16:39,560 [INFO] Gateway and channel created.
+2025-11-15 12:16:39,561 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 12:16:39,561 [DEBUG] Code sent, waiting for result...
+2025-11-15 12:22:03,520 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 12:22:03,522 [INFO] [sandbox stdout]
+Загружено строк: 1000
+[2025-11-15 12:16:51,690] - [   MODEL    ] - 1 out of 8. type
+[2025-11-15 12:16:51,690] - [   START    ] - Working with type
+[2025-11-15 12:16:51,690] - [   START    ] - Tuning type
+[2025-11-15 12:16:57,487] - [   OPTUNA   ] - Trial 0. New best score 0.6021904761904763 with parameters {'max_iter': 8277, 'fit_intercept': True, 'C': 1.8590843630169627, 'solver': 'saga', 'penalty': 'elasticnet', 'l1_ratio': 0.9636627605010293}
+[2025-11-15 12:17:01,571] - [   OPTUNA   ] - Trial 1. New best score 0.6021904761904763 with parameters {'max_iter': 5813, 'fit_intercept': True, 'C': 2.5601615250028704, 'solver': 'saga', 'penalty': None}
+[2025-11-15 12:17:05,694] - [   OPTUNA   ] - 3 trials completed
+[2025-11-15 12:17:05,694] - [BEST PARAMS ] - {'random_state': 0, 'n_jobs': 3, 'verbose': 0, 'max_iter': 8277, 'fit_intercept': True, 'C': 1.8590843630169627, 'solver': 'saga', 'penalty': 'elasticnet', 'l1_ratio': 0.9636627605010293, 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'type', 'eval_metric': 'custom_metric'}
+[2025-11-15 12:17:05,694] - [    END     ] - Tuning type
+[2025-11-15 12:17:05,694] - [   START    ] - Fitting type
+[2025-11-15 12:17:11,586] - [    END     ] - Fitting type
+[2025-11-15 12:17:11,600] - [   SCORE    ] - Train: 0.6027476190476191
+[2025-11-15 12:17:11,601] - [   SCORE    ] - OOF: 0.598252380952381
+[2025-11-15 12:17:11,602] - [    END     ] - Working with type
+[2025-11-15 12:17:11,602] - [  NEW BEST  ] - type. Best score: 0.598252380952381 
+
+[2025-11-15 12:17:11,602] - [   MODEL    ] - 2 out of 8. ABCMeta
+[2025-11-15 12:17:11,602] - [   START    ] - Working with ABCMeta
+[2025-11-15 12:17:11,602] - [   START    ] - Tuning ABCMeta
+[2025-11-15 12:17:18,749] - [   OPTUNA   ] - Trial 0. New best score 0.7625238095238095 with parameters {'n_estimators': 553, 'max_depth': 12, 'min_samples_split': 0.12055267521432877, 'min_samples_leaf': 0.10897663659937938, 'max_features': 0.4812893194050143, 'bootstrap': True, 'max_samples': 0.9458865003910399, 'oob_score': True, 'criterion': 'gini', 'class_weight': 'balanced_subsample'}
+[2025-11-15 12:17:21,979] - [   OPTUNA   ] - Trial 2. New best score 0.7678571428571428 with parameters {'n_estimators': 272, 'max_depth': 12, 'min_samples_split': 0.09123006644330972, 'min_samples_leaf': 0.1136867897737297, 'max_features': 0.11691082039271963, 'bootstrap': True, 'max_samples': 0.8084669984373785, 'oob_score': True, 'criterion': 'entropy', 'class_weight': 'balanced'}
+[2025-11-15 12:17:21,980] - [   OPTUNA   ] - 3 trials completed
+[2025-11-15 12:17:21,980] - [BEST PARAMS ] - {'random_state': 0, 'n_jobs': 3, 'verbose': 0, 'n_estimators': 272, 'max_depth': 12, 'min_samples_split': 0.09123006644330972, 'min_samples_leaf': 0.1136867897737297, 'max_features': 0.11691082039271963, 'bootstrap': True, 'max_samples': 0.8084669984373785, 'oob_score': True, 'criterion': 'entropy', 'class_weight': 'balanced', 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'ABCMeta', 'eval_metric': 'custom_metric'}
+[2025-11-15 12:17:21,980] - [    END     ] - Tuning ABCMeta
+[2025-11-15 12:17:21,980] - [   START    ] - Fitting ABCMeta
+[2025-11-15 12:17:25,304] - [    END     ] - Fitting ABCMeta
+[2025-11-15 12:17:25,662] - [   SCORE    ] - Train: 0.7901714285714285
+[2025-11-15 12:17:25,663] - [   SCORE    ] - OOF: 0.7669047619047619
+[2025-11-15 12:17:25,664] - [    END     ] - Working with ABCMeta
+[2025-11-15 12:17:25,664] - [  NEW BEST  ] - ABCMeta. Best score: 0.7669047619047619 
+
+[2025-11-15 12:17:25,664] - [   MODEL    ] - 3 out of 8. ABCMeta
+[2025-11-15 12:17:25,664] - [   START    ] - Working with ABCMeta
+[2025-11-15 12:17:25,664] - [   START    ] - Tuning ABCMeta
+[2025-11-15 12:17:32,303] - [   OPTUNA   ] - Trial 0. New best score 0.7689999999999999 with parameters {'n_estimators': 553, 'max_depth': 12, 'min_samples_split': 0.12055267521432877, 'min_samples_leaf': 0.10897663659937938, 'max_features': 0.4812893194050143, 'bootstrap': True, 'max_samples': 0.9458865003910399, 'oob_score': True, 'criterion': 'gini', 'class_weight': 'balanced_subsample'}
+[2025-11-15 12:17:42,759] - [   OPTUNA   ] - Trial 3. New best score 0.774904761904762 with parameters {'n_estimators': 674, 'max_depth': 4, 'min_samples_split': 0.02578525953097066, 'min_samples_leaf': 0.06308567018483678, 'max_features': 0.42733969384836035, 'bootstrap': True, 'max_samples': 0.9941869190296131, 'oob_score': False, 'criterion': 'entropy', 'class_weight': 'balanced_subsample'}
+[2025-11-15 12:17:42,760] - [   OPTUNA   ] - 4 trials completed
+[2025-11-15 12:17:42,761] - [BEST PARAMS ] - {'random_state': 0, 'n_jobs': 3, 'verbose': 0, 'n_estimators': 674, 'max_depth': 4, 'min_samples_split': 0.02578525953097066, 'min_samples_leaf': 0.06308567018483678, 'max_features': 0.42733969384836035, 'bootstrap': True, 'max_samples': 0.9941869190296131, 'oob_score': False, 'criterion': 'entropy', 'class_weight': 'balanced_subsample', 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'ABCMeta', 'eval_metric': 'custom_metric'}
+[2025-11-15 12:17:42,761] - [    END     ] - Tuning ABCMeta
+[2025-11-15 12:17:42,761] - [   START    ] - Fitting ABCMeta
+[2025-11-15 12:17:52,463] - [    END     ] - Fitting ABCMeta
+[2025-11-15 12:17:53,164] - [   SCORE    ] - Train: 0.7986142857142857
+[2025-11-15 12:17:53,165] - [   SCORE    ] - OOF: 0.7691142857142858
+[2025-11-15 12:17:53,166] - [    END     ] - Working with ABCMeta
+[2025-11-15 12:17:53,166] - [  NEW BEST  ] - ABCMeta. Best score: 0.7691142857142858 
+
+[2025-11-15 12:17:53,166] - [   MODEL    ] - 4 out of 8. CatBoostClassification
+[2025-11-15 12:17:53,166] - [   START    ] - Working with CatBoostClassification
+[2025-11-15 12:17:53,166] - [   START    ] - Tuning CatBoostClassification
+[2025-11-15 12:19:58,654] - [   OPTUNA   ] - Trial 0. New best score 0.5639452442278577 with parameters {'boosting_type': 'Plain', 'depth': 9, 'l2_leaf_reg': 143.0378732744839, 'bootstrap_type': 'Bernoulli', 'grow_policy': 'Depthwise', 'min_data_in_leaf': 229, 'rsm': 0.9781976563006176, 'subsample': 0.6300649112954666, 'model_size_reg': 158.3450076165329, 'auto_class_weights': None, 'iterations': 442}
+[2025-11-15 12:19:58,654] - [   OPTUNA   ] - 1 trials completed
+[2025-11-15 12:19:58,654] - [BEST PARAMS ] - {'iterations': 442, 'thread_count': 3, 'logging_level': 'Silent', 'task_type': 'CPU', 'od_type': 'Iter', 'od_wait': 100, 'random_state': 0, 'od_pval': None, 'cat_features': ['other_parties', 'property_magnitude', 'savings_status', 'checking_status', 'purpose', 'housing', 'job', 'own_telephone', 'foreign_worker', 'employment', 'personal_status', 'other_payment_plans', 'credit_history'], 'boosting_type': 'Plain', 'depth': 9, 'l2_leaf_reg': 143.0378732744839, 'bootstrap_type': 'Bernoulli', 'grow_policy': 'Depthwise', 'min_data_in_leaf': 229, 'rsm': 0.9781976563006176, 'subsample': 0.6300649112954666, 'model_size_reg': 158.3450076165329, 'auto_class_weights': None, 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'CatBoostClassification', 'eval_metric': None}
+[2025-11-15 12:19:58,654] - [    END     ] - Tuning CatBoostClassification
+[2025-11-15 12:19:58,654] - [   START    ] - Fitting CatBoostClassification
+[2025-11-15 12:21:29,935] - [    END     ] - Fitting CatBoostClassification
+[2025-11-15 12:21:30,004] - [   SCORE    ] - Train: 0.7536428571428572
+[2025-11-15 12:21:30,005] - [   SCORE    ] - OOF: 0.6865285714285714
+[2025-11-15 12:21:30,006] - [    END     ] - Working with CatBoostClassification
+[2025-11-15 12:21:30,006] - [BEST  MODEL ] - ABCMeta. Best score: 0.7691142857142858 
+
+[2025-11-15 12:21:30,006] - [   MODEL    ] - 5 out of 8. XGBClassification
+[2025-11-15 12:21:30,006] - [   START    ] - Working with XGBClassification
+[2025-11-15 12:21:30,006] - [   START    ] - Tuning XGBClassification
+[2025-11-15 12:21:30,832] - [   OPTUNA   ] - Trial 0. New best score 0.5597762547656894 with parameters {'max_depth': 9, 'grow_policy': 'depthwise', 'max_leaves': 284, 'gamma': 8.473095986778095, 'subsample': 0.6813047017599905, 'colsample_bytree': 0.49382849013642327, 'colsample_bylevel': 0.9025957007038717, 'reg_lambda': 9.636627605010293, 'reg_alpha': 3.8344151882577773, 'min_child_weight': 16, 'class_weight': 'balanced', 'num_boost_round': 166}
+[2025-11-15 12:21:32,126] - [   OPTUNA   ] - Trial 2. New best score 0.5469156310781836 with parameters {'max_depth': 3, 'grow_policy': 'depthwise', 'max_leaves': 218, 'gamma': 5.29111224209254, 'subsample': 0.796810320490795, 'colsample_bytree': 0.5105352989948937, 'colsample_bylevel': 0.6115905539817836, 'reg_lambda': 0.18789800436355142, 'reg_alpha': 6.176354970758771, 'min_child_weight': 12, 'class_weight': 'balanced', 'num_boost_round': 132}
+[2025-11-15 12:21:32,841] - [   OPTUNA   ] - Trial 3. New best score 0.5113548259059899 with parameters {'max_depth': 11, 'grow_policy': 'lossguide', 'max_leaves': 360, 'gamma': 1.2045094325853967, 'subsample': 0.7000900439011009, 'colsample_bytree': 0.7035740826563435, 'colsample_bylevel': 0.2893443049664568, 'reg_lambda': 1.289262976548533, 'reg_alpha': 3.1542835092418384, 'min_child_weight': 7, 'class_weight': None, 'num_boost_round': 141}
+[2025-11-15 12:21:40,304] - [   OPTUNA   ] - 15 trials completed
+[2025-11-15 12:21:40,304] - [BEST PARAMS ] - {'nthread': 3, 'device': 'cpu', 'objective': 'binary:logistic', 'seed': 0, 'verbosity': 0, 'num_boost_round': 141, 'early_stopping_rounds': 100, 'class_weight': None, 'scale_pos_weight': 2.3333333333333335, 'max_depth': 11, 'grow_policy': 'lossguide', 'max_leaves': 360, 'gamma': 1.2045094325853967, 'subsample': 0.7000900439011009, 'colsample_bytree': 0.7035740826563435, 'colsample_bylevel': 0.2893443049664568, 'reg_lambda': 1.289262976548533, 'reg_alpha': 3.1542835092418384, 'min_child_weight': 7, 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'XGBClassification', 'eval_metric': None}
+[2025-11-15 12:21:40,304] - [    END     ] - Tuning XGBClassification
+[2025-11-15 12:21:40,304] - [   START    ] - Fitting XGBClassification
+[2025-11-15 12:21:41,026] - [    END     ] - Fitting XGBClassification
+[2025-11-15 12:21:41,042] - [   SCORE    ] - Train: 0.9236428571428571
+[2025-11-15 12:21:41,043] - [   SCORE    ] - OOF: 0.7869761904761906
+[2025-11-15 12:21:41,046] - [    END     ] - Working with XGBClassification
+[2025-11-15 12:21:41,046] - [  NEW BEST  ] - XGBClassification. Best score: 0.7869761904761906 
+
+[2025-11-15 12:21:41,046] - [   MODEL    ] - 6 out of 8. LightGBMClassification
+[2025-11-15 12:21:41,046] - [   START    ] - Working with LightGBMClassification
+[2025-11-15 12:21:41,046] - [   START    ] - Tuning LightGBMClassification
+[2025-11-15 12:21:41,176] - [   OPTUNA   ] - Trial 0. New best score 0.5712048372988828 with parameters {'max_depth': 9, 'num_leaves': 369, 'min_data_in_leaf': 155, 'bagging_fraction': 0.7724415914984484, 'bagging_freq': 10, 'feature_fraction': 0.7875364678399936, 'lambda_l1': 4.375872112626925, 'lambda_l2': 8.917730007820797, 'min_gain_to_split': 19.273255210020587, 'is_unbalance': 'false', 'num_iterations': 8}
+[2025-11-15 12:21:41,436] - [   OPTUNA   ] - Trial 2. New best score 0.5623445350484669 with parameters {'max_depth': 8, 'num_leaves': 402, 'min_data_in_leaf': 31, 'bagging_fraction': 0.819960510663762, 'bagging_freq': 0, 'feature_fraction': 0.9668013502297503, 'lambda_l1': 5.218483217500717, 'lambda_l2': 4.146619399905235, 'min_gain_to_split': 5.29111224209254, 'is_unbalance': 'true', 'num_iterations': 10}
+[2025-11-15 12:21:41,946] - [   OPTUNA   ] - Trial 5. New best score 0.5155735381468469 with parameters {'max_depth': 3, 'num_leaves': 338, 'min_data_in_leaf': 65, 'bagging_fraction': 0.7331553864281531, 'bagging_freq': 5, 'feature_fraction': 0.49538175018731184, 'lambda_l1': 1.1037514116430513, 'lambda_l2': 6.563295894652734, 'min_gain_to_split': 2.763659026972276, 'is_unbalance': 'false', 'num_iterations': 50}
+[2025-11-15 12:21:43,000] - [   OPTUNA   ] - Trial 10. New best score 0.4995032113185916 with parameters {'max_depth': 5, 'num_leaves': 182, 'min_data_in_leaf': 111, 'bagging_fraction': 0.964820177513915, 'bagging_freq': 5, 'feature_fraction': 0.5232207629150817, 'lambda_l1': 0.4781419499751117, 'lambda_l2': 9.560593113504746, 'min_gain_to_split': 0.26097890128892764, 'is_unbalance': 'false', 'num_iterations': 122}
+[2025-11-15 12:21:44,606] - [   OPTUNA   ] - Trial 16. New best score 0.49853211216085924 with parameters {'max_depth': 4, 'num_leaves': 130, 'min_data_in_leaf': 159, 'bagging_fraction': 0.9245587440876063, 'bagging_freq': 5, 'feature_fraction': 0.4819342320923877, 'lambda_l1': 1.8314779255534668, 'lambda_l2': 0.10032607509862501, 'min_gain_to_split': 0.012823406954340894, 'is_unbalance': 'false', 'num_iterations': 228}
+[2025-11-15 12:21:45,729] - [   OPTUNA   ] - Trial 21. New best score 0.4981984093702347 with parameters {'max_depth': 7, 'num_leaves': 215, 'min_data_in_leaf': 116, 'bagging_fraction': 0.9712881263760241, 'bagging_freq': 5, 'feature_fraction': 0.5669434486826914, 'lambda_l1': 0.6551539929436725, 'lambda_l2': 8.527565307949835, 'min_gain_to_split': 0.08867624582380937, 'is_unbalance': 'false', 'num_iterations': 147}
+[2025-11-15 12:21:47,318] - [   OPTUNA   ] - Trial 27. New best score 0.4976034427222176 with parameters {'max_depth': 3, 'num_leaves': 202, 'min_data_in_leaf': 130, 'bagging_fraction': 0.8442124066948405, 'bagging_freq': 0, 'feature_fraction': 0.5799972715237883, 'lambda_l1': 0.6105131563732318, 'lambda_l2': 9.203656336302673, 'min_gain_to_split': 0.01718060905452389, 'is_unbalance': 'false', 'num_iterations': 187}
+[2025-11-15 12:21:50,974] - [   OPTUNA   ] - Trial 43. New best score 0.4975824768366893 with parameters {'max_depth': 11, 'num_leaves': 127, 'min_data_in_leaf': 136, 'bagging_fraction': 0.8251212779725992, 'bagging_freq': 10, 'feature_fraction': 0.42695037859344576, 'lambda_l1': 0.5185028546946553, 'lambda_l2': 6.392079358907619, 'min_gain_to_split': 0.1308049328068142, 'is_unbalance': 'false', 'num_iterations': 180}
+[2025-11-15 12:21:51,414] - [   OPTUNA   ] - 45 trials completed
+[2025-11-15 12:21:51,414] - [BEST PARAMS ] - {'num_iterations': 180, 'num_threads': 3, 'seed': 0, 'verbosity': -1, 'device_type': 'cpu', 'early_stopping_round': 100, 'early_stopping_min_delta': 0.0001, 'objective': 'binary', 'metric': '', 'max_depth': 11, 'num_leaves': 127, 'min_data_in_leaf': 136, 'bagging_fraction': 0.8251212779725992, 'bagging_freq': 10, 'feature_fraction': 0.42695037859344576, 'lambda_l1': 0.5185028546946553, 'lambda_l2': 6.392079358907619, 'min_gain_to_split': 0.1308049328068142, 'is_unbalance': 'false', 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'LightGBMClassification', 'eval_metric': None}
+[2025-11-15 12:21:51,414] - [    END     ] - Tuning LightGBMClassification
+[2025-11-15 12:21:51,414] - [   START    ] - Fitting LightGBMClassification
+[2025-11-15 12:21:51,850] - [    END     ] - Fitting LightGBMClassification
+[2025-11-15 12:21:51,900] - [   SCORE    ] - Train: 0.8316
+[2025-11-15 12:21:51,902] - [   SCORE    ] - OOF: 0.780645238095238
+[2025-11-15 12:21:51,905] - [    END     ] - Working with LightGBMClassification
+[2025-11-15 12:21:51,905] - [BEST  MODEL ] - XGBClassification. Best score: 0.7869761904761906 
+
+[2025-11-15 12:21:51,905] - [   MODEL    ] - 7 out of 8. Stacker
+[2025-11-15 12:21:51,907] - [   START    ] - Working with Stacker
+[2025-11-15 12:21:51,907] - [   START    ] - Tuning Stacker
+[2025-11-15 12:21:52,000] - [   OPTUNA   ] - Trial 0. New best score 0.5348899417838299 with parameters {'max_depth': 9, 'num_leaves': 369, 'min_data_in_leaf': 155, 'bagging_fraction': 0.7724415914984484, 'bagging_freq': 10, 'feature_fraction': 0.7875364678399936, 'lambda_l1': 4.375872112626925, 'lambda_l2': 8.917730007820797, 'min_gain_to_split': 19.273255210020587, 'is_unbalance': 'false', 'num_iterations': 13}
+[2025-11-15 12:21:52,153] - [   OPTUNA   ] - Trial 2. New best score 0.5329870419132969 with parameters {'max_depth': 8, 'num_leaves': 402, 'min_data_in_leaf': 31, 'bagging_fraction': 0.819960510663762, 'bagging_freq': 0, 'feature_fraction': 0.9668013502297503, 'lambda_l1': 5.218483217500717, 'lambda_l2': 4.146619399905235, 'min_gain_to_split': 5.29111224209254, 'is_unbalance': 'true', 'num_iterations': 15}
+[2025-11-15 12:21:52,384] - [   OPTUNA   ] - Trial 5. New best score 0.4928675877310704 with parameters {'max_depth': 3, 'num_leaves': 338, 'min_data_in_leaf': 65, 'bagging_fraction': 0.7331553864281531, 'bagging_freq': 5, 'feature_fraction': 0.49538175018731184, 'lambda_l1': 1.1037514116430513, 'lambda_l2': 6.563295894652734, 'min_gain_to_split': 2.763659026972276, 'is_unbalance': 'false', 'num_iterations': 43}
+[2025-11-15 12:21:53,164] - [   OPTUNA   ] - Trial 12. New best score 0.48232387791532105 with parameters {'max_depth': 4, 'num_leaves': 202, 'min_data_in_leaf': 4, 'bagging_fraction': 0.9868922726224103, 'bagging_freq': 5, 'feature_fraction': 0.5174749517288866, 'lambda_l1': 0.09072301359096713, 'lambda_l2': 8.156486139454296, 'min_gain_to_split': 0.19718304789365015, 'is_unbalance': 'false', 'num_iterations': 39}
+[2025-11-15 12:22:01,933] - [   OPTUNA   ] - 91 trials completed
+[2025-11-15 12:22:01,933] - [BEST PARAMS ] - {'num_iterations': 39, 'num_threads': 3, 'seed': 0, 'verbosity': -1, 'device_type': 'cpu', 'early_stopping_round': 100, 'early_stopping_min_delta': 0.0001, 'objective': 'binary', 'metric': '', 'max_depth': 4, 'num_leaves': 202, 'min_data_in_leaf': 4, 'bagging_fraction': 0.9868922726224103, 'bagging_freq': 5, 'feature_fraction': 0.5174749517288866, 'lambda_l1': 0.09072301359096713, 'lambda_l2': 8.156486139454296, 'min_gain_to_split': 0.19718304789365015, 'is_unbalance': 'false', 'time_series': False, 'model_type': 'classification', 'n_splits': 5, 'name': 'Stacker', 'eval_metric': None}
+[2025-11-15 12:22:01,933] - [    END     ] - Tuning Stacker
+[2025-11-15 12:22:01,933] - [   START    ] - Fitting Stacker
+[2025-11-15 12:22:02,074] - [    END     ] - Fitting Stacker
+[2025-11-15 12:22:02,098] - [   SCORE    ] - Train: 0.8842333333333333
+[2025-11-15 12:22:02,100] - [   SCORE    ] - OOF: 0.7969261904761906
+[2025-11-15 12:22:02,103] - [    END     ] - Working with Stacker
+[2025-11-15 12:22:02,103] - [  NEW BEST  ] - Stacker. Best score: 0.7969261904761906 
+
+[2025-11-15 12:22:02,103] - [   MODEL    ] - 8 out of 8. Blender
+[2025-11-15 12:22:02,103] - [   START    ] - Working with Blender
+[2025-11-15 12:22:02,103] - [   START    ] - Tuning Blender
+[2025-11-15 12:22:02,139] - [   OPTUNA   ] - Best score 0.7966571428571428 with weights [0.0, 0.11446603088872445, 0.1291951885790642, 0.14847590630854748, 0.3474293869603747, 0.2604334872632892]
+[2025-11-15 12:22:02,176] - [   OPTUNA   ] - Best score 0.7966571428571428 with weights [0.0, 0.11446603088872445, 0.1291951885790642, 0.14847590630854748, 0.3474293869603747, 0.2604334872632892]
+[2025-11-15 12:22:02,176] - [BEST PARAMS ] - {'weights': [0.0, 0.11446603088872445, 0.1291951885790642, 0.14847590630854748, 0.3474293869603747, 0.2604334872632892], 'n': 6, 'random_state': 42, 'n_iters': 10, 'n_inner_iters': 3}
+[2025-11-15 12:22:02,176] - [    END     ] - Tuning Blender
+[2025-11-15 12:22:02,178] - [   SCORE    ] - Train: 0.7966571428571428
+[2025-11-15 12:22:02,180] - [   SCORE    ] - OOF: 0.7966571428571428
+[2025-11-15 12:22:02,182] - [    END     ] - Working with Blender
+[2025-11-15 12:22:02,182] - [BEST  MODEL ] - Stacker. Best score: 0.7969261904761906 
+
+RESULT_START
+{"ok": false, "predict_path": null, "message": "'numpy.ndarray' object has no attribute 'to_csv'", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 57, in <module>\nAttributeError: 'numpy.ndarray' object has no attribute 'to_csv'\n"}
+RESULT_END
+2025-11-15 12:29:50,858 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 12:29:50,859 [DEBUG] Code sent, waiting for result...
+2025-11-15 12:31:30,756 [INFO] Creating new execnet gateway with python=c:\Users\User1\Desktop\ITMO_bootcamp\.venv\Scripts\python.exe
+2025-11-15 12:31:30,832 [INFO] Gateway and channel created.
+2025-11-15 12:31:30,833 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 12:31:30,834 [DEBUG] Code sent, waiting for result...
+2025-11-15 12:37:01,525 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 12:37:01,526 [INFO] [sandbox stdout]
+Загружено строк: 1000
+[2025-11-15 12:31:34,869] - [   MODEL    ] - 1 out of 8. type
+[2025-11-15 12:31:34,869] - [   START    ] - Working with type
+[2025-11-15 12:31:34,869] - [   START    ] - Tuning type
+[2025-11-15 12:31:40,910] - [   OPTUNA   ] - Trial 0. New best score 0.6021904761904763 with parameters {'max_iter': 8277, 'fit_intercept': True, 'C': 1.8590843630169627, 'solver': 'saga', 'penalty': 'elasticnet', 'l1_ratio': 0.9636627605010293}
+[2025-11-15 12:31:45,090] - [   OPTUNA   ] - Trial 1. New best score 0.6021904761904763 with parameters {'max_iter': 5813, 'fit_intercept': True, 'C': 2.5601615250028704, 'solver': 'saga', 'penalty': None}
+[2025-11-15 12:31:45,091] - [   OPTUNA   ] - 2 trials completed
+[2025-11-15 12:31:45,091] - [BEST PARAMS ] - {'random_state': 0, 'n_jobs': 3, 'verbose': 0, 'max_iter': 8277, 'fit_intercept': True, 'C': 1.8590843630169627, 'solver': 'saga', 'penalty': 'elasticnet', 'l1_ratio': 0.9636627605010293, 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'type', 'eval_metric': 'custom_metric'}
+[2025-11-15 12:31:45,091] - [    END     ] - Tuning type
+[2025-11-15 12:31:45,091] - [   START    ] - Fitting type
+[2025-11-15 12:31:51,232] - [    END     ] - Fitting type
+[2025-11-15 12:31:51,246] - [   SCORE    ] - Train: 0.6027476190476191
+[2025-11-15 12:31:51,247] - [   SCORE    ] - OOF: 0.598252380952381
+[2025-11-15 12:31:51,248] - [    END     ] - Working with type
+[2025-11-15 12:31:51,248] - [  NEW BEST  ] - type. Best score: 0.598252380952381 
+
+[2025-11-15 12:31:51,248] - [   MODEL    ] - 2 out of 8. ABCMeta
+[2025-11-15 12:31:51,248] - [   START    ] - Working with ABCMeta
+[2025-11-15 12:31:51,248] - [   START    ] - Tuning ABCMeta
+[2025-11-15 12:31:58,860] - [   OPTUNA   ] - Trial 0. New best score 0.7625238095238095 with parameters {'n_estimators': 553, 'max_depth': 12, 'min_samples_split': 0.12055267521432877, 'min_samples_leaf': 0.10897663659937938, 'max_features': 0.4812893194050143, 'bootstrap': True, 'max_samples': 0.9458865003910399, 'oob_score': True, 'criterion': 'gini', 'class_weight': 'balanced_subsample'}
+[2025-11-15 12:32:02,325] - [   OPTUNA   ] - Trial 2. New best score 0.7678571428571428 with parameters {'n_estimators': 272, 'max_depth': 12, 'min_samples_split': 0.09123006644330972, 'min_samples_leaf': 0.1136867897737297, 'max_features': 0.11691082039271963, 'bootstrap': True, 'max_samples': 0.8084669984373785, 'oob_score': True, 'criterion': 'entropy', 'class_weight': 'balanced'}
+[2025-11-15 12:32:02,325] - [   OPTUNA   ] - 3 trials completed
+[2025-11-15 12:32:02,325] - [BEST PARAMS ] - {'random_state': 0, 'n_jobs': 3, 'verbose': 0, 'n_estimators': 272, 'max_depth': 12, 'min_samples_split': 0.09123006644330972, 'min_samples_leaf': 0.1136867897737297, 'max_features': 0.11691082039271963, 'bootstrap': True, 'max_samples': 0.8084669984373785, 'oob_score': True, 'criterion': 'entropy', 'class_weight': 'balanced', 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'ABCMeta', 'eval_metric': 'custom_metric'}
+[2025-11-15 12:32:02,325] - [    END     ] - Tuning ABCMeta
+[2025-11-15 12:32:02,326] - [   START    ] - Fitting ABCMeta
+[2025-11-15 12:32:05,782] - [    END     ] - Fitting ABCMeta
+[2025-11-15 12:32:06,141] - [   SCORE    ] - Train: 0.7901714285714285
+[2025-11-15 12:32:06,142] - [   SCORE    ] - OOF: 0.7669047619047619
+[2025-11-15 12:32:06,144] - [    END     ] - Working with ABCMeta
+[2025-11-15 12:32:06,144] - [  NEW BEST  ] - ABCMeta. Best score: 0.7669047619047619 
+
+[2025-11-15 12:32:06,144] - [   MODEL    ] - 3 out of 8. ABCMeta
+[2025-11-15 12:32:06,144] - [   START    ] - Working with ABCMeta
+[2025-11-15 12:32:06,144] - [   START    ] - Tuning ABCMeta
+[2025-11-15 12:32:13,377] - [   OPTUNA   ] - Trial 0. New best score 0.7689999999999999 with parameters {'n_estimators': 553, 'max_depth': 12, 'min_samples_split': 0.12055267521432877, 'min_samples_leaf': 0.10897663659937938, 'max_features': 0.4812893194050143, 'bootstrap': True, 'max_samples': 0.9458865003910399, 'oob_score': True, 'criterion': 'gini', 'class_weight': 'balanced_subsample'}
+[2025-11-15 12:32:16,627] - [   OPTUNA   ] - 3 trials completed
+[2025-11-15 12:32:16,628] - [BEST PARAMS ] - {'random_state': 0, 'n_jobs': 3, 'verbose': 0, 'n_estimators': 553, 'max_depth': 12, 'min_samples_split': 0.12055267521432877, 'min_samples_leaf': 0.10897663659937938, 'max_features': 0.4812893194050143, 'bootstrap': True, 'max_samples': 0.9458865003910399, 'oob_score': True, 'criterion': 'gini', 'class_weight': 'balanced_subsample', 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'ABCMeta', 'eval_metric': 'custom_metric'}
+[2025-11-15 12:32:16,628] - [    END     ] - Tuning ABCMeta
+[2025-11-15 12:32:16,628] - [   START    ] - Fitting ABCMeta
+[2025-11-15 12:32:25,790] - [    END     ] - Fitting ABCMeta
+[2025-11-15 12:32:26,427] - [   SCORE    ] - Train: 0.7853809523809525
+[2025-11-15 12:32:26,428] - [   SCORE    ] - OOF: 0.7628333333333334
+[2025-11-15 12:32:26,430] - [    END     ] - Working with ABCMeta
+[2025-11-15 12:32:26,430] - [BEST  MODEL ] - ABCMeta. Best score: 0.7669047619047619 
+
+[2025-11-15 12:32:26,430] - [   MODEL    ] - 4 out of 8. CatBoostClassification
+[2025-11-15 12:32:26,430] - [   START    ] - Working with CatBoostClassification
+[2025-11-15 12:32:26,430] - [   START    ] - Tuning CatBoostClassification
+[2025-11-15 12:34:56,952] - [   OPTUNA   ] - Trial 0. New best score 0.5639452442278577 with parameters {'boosting_type': 'Plain', 'depth': 9, 'l2_leaf_reg': 143.0378732744839, 'bootstrap_type': 'Bernoulli', 'grow_policy': 'Depthwise', 'min_data_in_leaf': 229, 'rsm': 0.9781976563006176, 'subsample': 0.6300649112954666, 'model_size_reg': 158.3450076165329, 'auto_class_weights': None, 'iterations': 442}
+[2025-11-15 12:34:56,952] - [   OPTUNA   ] - 1 trials completed
+[2025-11-15 12:34:56,952] - [BEST PARAMS ] - {'iterations': 442, 'thread_count': 3, 'logging_level': 'Silent', 'task_type': 'CPU', 'od_type': 'Iter', 'od_wait': 100, 'random_state': 0, 'od_pval': None, 'cat_features': ['property_magnitude', 'savings_status', 'housing', 'other_payment_plans', 'foreign_worker', 'employment', 'personal_status', 'job', 'credit_history', 'other_parties', 'own_telephone', 'purpose', 'checking_status'], 'boosting_type': 'Plain', 'depth': 9, 'l2_leaf_reg': 143.0378732744839, 'bootstrap_type': 'Bernoulli', 'grow_policy': 'Depthwise', 'min_data_in_leaf': 229, 'rsm': 0.9781976563006176, 'subsample': 0.6300649112954666, 'model_size_reg': 158.3450076165329, 'auto_class_weights': None, 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'CatBoostClassification', 'eval_metric': None}
+[2025-11-15 12:34:56,952] - [    END     ] - Tuning CatBoostClassification
+[2025-11-15 12:34:56,952] - [   START    ] - Fitting CatBoostClassification
+[2025-11-15 12:36:28,034] - [    END     ] - Fitting CatBoostClassification
+[2025-11-15 12:36:28,101] - [   SCORE    ] - Train: 0.7536428571428572
+[2025-11-15 12:36:28,102] - [   SCORE    ] - OOF: 0.6865285714285714
+[2025-11-15 12:36:28,104] - [    END     ] - Working with CatBoostClassification
+[2025-11-15 12:36:28,104] - [BEST  MODEL ] - ABCMeta. Best score: 0.7669047619047619 
+
+[2025-11-15 12:36:28,104] - [   MODEL    ] - 5 out of 8. XGBClassification
+[2025-11-15 12:36:28,104] - [   START    ] - Working with XGBClassification
+[2025-11-15 12:36:28,104] - [   START    ] - Tuning XGBClassification
+[2025-11-15 12:36:28,945] - [   OPTUNA   ] - Trial 0. New best score 0.5597762547656894 with parameters {'max_depth': 9, 'grow_policy': 'depthwise', 'max_leaves': 284, 'gamma': 8.473095986778095, 'subsample': 0.6813047017599905, 'colsample_bytree': 0.49382849013642327, 'colsample_bylevel': 0.9025957007038717, 'reg_lambda': 9.636627605010293, 'reg_alpha': 3.8344151882577773, 'min_child_weight': 16, 'class_weight': 'balanced', 'num_boost_round': 166}
+[2025-11-15 12:36:30,281] - [   OPTUNA   ] - Trial 2. New best score 0.5469156310781836 with parameters {'max_depth': 3, 'grow_policy': 'depthwise', 'max_leaves': 218, 'gamma': 5.29111224209254, 'subsample': 0.796810320490795, 'colsample_bytree': 0.5105352989948937, 'colsample_bylevel': 0.6115905539817836, 'reg_lambda': 0.18789800436355142, 'reg_alpha': 6.176354970758771, 'min_child_weight': 12, 'class_weight': 'balanced', 'num_boost_round': 132}
+[2025-11-15 12:36:30,999] - [   OPTUNA   ] - Trial 3. New best score 0.5113548259059899 with parameters {'max_depth': 11, 'grow_policy': 'lossguide', 'max_leaves': 360, 'gamma': 1.2045094325853967, 'subsample': 0.7000900439011009, 'colsample_bytree': 0.7035740826563435, 'colsample_bylevel': 0.2893443049664568, 'reg_lambda': 1.289262976548533, 'reg_alpha': 3.1542835092418384, 'min_child_weight': 7, 'class_weight': None, 'num_boost_round': 141}
+[2025-11-15 12:36:38,731] - [   OPTUNA   ] - 15 trials completed
+[2025-11-15 12:36:38,731] - [BEST PARAMS ] - {'nthread': 3, 'device': 'cpu', 'objective': 'binary:logistic', 'seed': 0, 'verbosity': 0, 'num_boost_round': 141, 'early_stopping_rounds': 100, 'class_weight': None, 'scale_pos_weight': 2.3333333333333335, 'max_depth': 11, 'grow_policy': 'lossguide', 'max_leaves': 360, 'gamma': 1.2045094325853967, 'subsample': 0.7000900439011009, 'colsample_bytree': 0.7035740826563435, 'colsample_bylevel': 0.2893443049664568, 'reg_lambda': 1.289262976548533, 'reg_alpha': 3.1542835092418384, 'min_child_weight': 7, 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'XGBClassification', 'eval_metric': None}
+[2025-11-15 12:36:38,731] - [    END     ] - Tuning XGBClassification
+[2025-11-15 12:36:38,731] - [   START    ] - Fitting XGBClassification
+[2025-11-15 12:36:39,474] - [    END     ] - Fitting XGBClassification
+[2025-11-15 12:36:39,493] - [   SCORE    ] - Train: 0.9236428571428571
+[2025-11-15 12:36:39,495] - [   SCORE    ] - OOF: 0.7869761904761906
+[2025-11-15 12:36:39,498] - [    END     ] - Working with XGBClassification
+[2025-11-15 12:36:39,498] - [  NEW BEST  ] - XGBClassification. Best score: 0.7869761904761906 
+
+[2025-11-15 12:36:39,498] - [   MODEL    ] - 6 out of 8. LightGBMClassification
+[2025-11-15 12:36:39,498] - [   START    ] - Working with LightGBMClassification
+[2025-11-15 12:36:39,499] - [   START    ] - Tuning LightGBMClassification
+[2025-11-15 12:36:39,633] - [   OPTUNA   ] - Trial 0. New best score 0.5712048372988828 with parameters {'max_depth': 9, 'num_leaves': 369, 'min_data_in_leaf': 155, 'bagging_fraction': 0.7724415914984484, 'bagging_freq': 10, 'feature_fraction': 0.7875364678399936, 'lambda_l1': 4.375872112626925, 'lambda_l2': 8.917730007820797, 'min_gain_to_split': 19.273255210020587, 'is_unbalance': 'false', 'num_iterations': 8}
+[2025-11-15 12:36:39,919] - [   OPTUNA   ] - Trial 2. New best score 0.5623445350484669 with parameters {'max_depth': 8, 'num_leaves': 402, 'min_data_in_leaf': 31, 'bagging_fraction': 0.819960510663762, 'bagging_freq': 0, 'feature_fraction': 0.9668013502297503, 'lambda_l1': 5.218483217500717, 'lambda_l2': 4.146619399905235, 'min_gain_to_split': 5.29111224209254, 'is_unbalance': 'true', 'num_iterations': 10}
+[2025-11-15 12:36:40,443] - [   OPTUNA   ] - Trial 5. New best score 0.5155735381468469 with parameters {'max_depth': 3, 'num_leaves': 338, 'min_data_in_leaf': 65, 'bagging_fraction': 0.7331553864281531, 'bagging_freq': 5, 'feature_fraction': 0.49538175018731184, 'lambda_l1': 1.1037514116430513, 'lambda_l2': 6.563295894652734, 'min_gain_to_split': 2.763659026972276, 'is_unbalance': 'false', 'num_iterations': 50}
+[2025-11-15 12:36:41,524] - [   OPTUNA   ] - Trial 10. New best score 0.4995032113185916 with parameters {'max_depth': 5, 'num_leaves': 182, 'min_data_in_leaf': 111, 'bagging_fraction': 0.964820177513915, 'bagging_freq': 5, 'feature_fraction': 0.5232207629150817, 'lambda_l1': 0.4781419499751117, 'lambda_l2': 9.560593113504746, 'min_gain_to_split': 0.26097890128892764, 'is_unbalance': 'false', 'num_iterations': 122}
+[2025-11-15 12:36:43,122] - [   OPTUNA   ] - Trial 16. New best score 0.49853211216085924 with parameters {'max_depth': 4, 'num_leaves': 130, 'min_data_in_leaf': 159, 'bagging_fraction': 0.9245587440876063, 'bagging_freq': 5, 'feature_fraction': 0.4819342320923877, 'lambda_l1': 1.8314779255534668, 'lambda_l2': 0.10032607509862501, 'min_gain_to_split': 0.012823406954340894, 'is_unbalance': 'false', 'num_iterations': 228}
+[2025-11-15 12:36:44,193] - [   OPTUNA   ] - Trial 21. New best score 0.4981984093702347 with parameters {'max_depth': 7, 'num_leaves': 215, 'min_data_in_leaf': 116, 'bagging_fraction': 0.9712881263760241, 'bagging_freq': 5, 'feature_fraction': 0.5669434486826914, 'lambda_l1': 0.6551539929436725, 'lambda_l2': 8.527565307949835, 'min_gain_to_split': 0.08867624582380937, 'is_unbalance': 'false', 'num_iterations': 147}
+[2025-11-15 12:36:45,675] - [   OPTUNA   ] - Trial 27. New best score 0.4976034427222176 with parameters {'max_depth': 3, 'num_leaves': 202, 'min_data_in_leaf': 130, 'bagging_fraction': 0.8442124066948405, 'bagging_freq': 0, 'feature_fraction': 0.5799972715237883, 'lambda_l1': 0.6105131563732318, 'lambda_l2': 9.203656336302673, 'min_gain_to_split': 0.01718060905452389, 'is_unbalance': 'false', 'num_iterations': 187}
+[2025-11-15 12:36:49,514] - [   OPTUNA   ] - Trial 43. New best score 0.4975824768366893 with parameters {'max_depth': 11, 'num_leaves': 127, 'min_data_in_leaf': 136, 'bagging_fraction': 0.8251212779725992, 'bagging_freq': 10, 'feature_fraction': 0.42695037859344576, 'lambda_l1': 0.5185028546946553, 'lambda_l2': 6.392079358907619, 'min_gain_to_split': 0.1308049328068142, 'is_unbalance': 'false', 'num_iterations': 180}
+[2025-11-15 12:36:49,519] - [   OPTUNA   ] - 44 trials completed
+[2025-11-15 12:36:49,519] - [BEST PARAMS ] - {'num_iterations': 180, 'num_threads': 3, 'seed': 0, 'verbosity': -1, 'device_type': 'cpu', 'early_stopping_round': 100, 'early_stopping_min_delta': 0.0001, 'objective': 'binary', 'metric': '', 'max_depth': 11, 'num_leaves': 127, 'min_data_in_leaf': 136, 'bagging_fraction': 0.8251212779725992, 'bagging_freq': 10, 'feature_fraction': 0.42695037859344576, 'lambda_l1': 0.5185028546946553, 'lambda_l2': 6.392079358907619, 'min_gain_to_split': 0.1308049328068142, 'is_unbalance': 'false', 'time_series': False, 'model_type': 'classification', 'n_splits': 10, 'name': 'LightGBMClassification', 'eval_metric': None}
+[2025-11-15 12:36:49,519] - [    END     ] - Tuning LightGBMClassification
+[2025-11-15 12:36:49,519] - [   START    ] - Fitting LightGBMClassification
+[2025-11-15 12:36:49,878] - [    END     ] - Fitting LightGBMClassification
+[2025-11-15 12:36:49,929] - [   SCORE    ] - Train: 0.8316
+[2025-11-15 12:36:49,931] - [   SCORE    ] - OOF: 0.780645238095238
+[2025-11-15 12:36:49,933] - [    END     ] - Working with LightGBMClassification
+[2025-11-15 12:36:49,933] - [BEST  MODEL ] - XGBClassification. Best score: 0.7869761904761906 
+
+[2025-11-15 12:36:49,933] - [   MODEL    ] - 7 out of 8. Stacker
+[2025-11-15 12:36:49,935] - [   START    ] - Working with Stacker
+[2025-11-15 12:36:49,935] - [   START    ] - Tuning Stacker
+[2025-11-15 12:36:50,029] - [   OPTUNA   ] - Trial 0. New best score 0.5321862515833315 with parameters {'max_depth': 9, 'num_leaves': 369, 'min_data_in_leaf': 155, 'bagging_fraction': 0.7724415914984484, 'bagging_freq': 10, 'feature_fraction': 0.7875364678399936, 'lambda_l1': 4.375872112626925, 'lambda_l2': 8.917730007820797, 'min_gain_to_split': 19.273255210020587, 'is_unbalance': 'false', 'num_iterations': 13}
+[2025-11-15 12:36:50,433] - [   OPTUNA   ] - Trial 5. New best score 0.49344349460912723 with parameters {'max_depth': 3, 'num_leaves': 338, 'min_data_in_leaf': 65, 'bagging_fraction': 0.7331553864281531, 'bagging_freq': 5, 'feature_fraction': 0.49538175018731184, 'lambda_l1': 1.1037514116430513, 'lambda_l2': 6.563295894652734, 'min_gain_to_split': 2.763659026972276, 'is_unbalance': 'false', 'num_iterations': 41}
+[2025-11-15 12:36:51,306] - [   OPTUNA   ] - Trial 12. New best score 0.48460989738403926 with parameters {'max_depth': 4, 'num_leaves': 202, 'min_data_in_leaf': 4, 'bagging_fraction': 0.9868922726224103, 'bagging_freq': 5, 'feature_fraction': 0.5174749517288866, 'lambda_l1': 0.09072301359096713, 'lambda_l2': 8.156486139454296, 'min_gain_to_split': 0.19718304789365015, 'is_unbalance': 'false', 'num_iterations': 41}
+[2025-11-15 12:36:59,949] - [   OPTUNA   ] - 95 trials completed
+[2025-11-15 12:36:59,949] - [BEST PARAMS ] - {'num_iterations': 41, 'num_threads': 3, 'seed': 0, 'verbosity': -1, 'device_type': 'cpu', 'early_stopping_round': 100, 'early_stopping_min_delta': 0.0001, 'objective': 'binary', 'metric': '', 'max_depth': 4, 'num_leaves': 202, 'min_data_in_leaf': 4, 'bagging_fraction': 0.9868922726224103, 'bagging_freq': 5, 'feature_fraction': 0.5174749517288866, 'lambda_l1': 0.09072301359096713, 'lambda_l2': 8.156486139454296, 'min_gain_to_split': 0.19718304789365015, 'is_unbalance': 'false', 'time_series': False, 'model_type': 'classification', 'n_splits': 5, 'name': 'Stacker', 'eval_metric': None}
+[2025-11-15 12:36:59,949] - [    END     ] - Tuning Stacker
+[2025-11-15 12:36:59,950] - [   START    ] - Fitting Stacker
+[2025-11-15 12:37:00,108] - [    END     ] - Fitting Stacker
+[2025-11-15 12:37:00,132] - [   SCORE    ] - Train: 0.8837476190476191
+[2025-11-15 12:37:00,134] - [   SCORE    ] - OOF: 0.794147619047619
+[2025-11-15 12:37:00,137] - [    END     ] - Working with Stacker
+[2025-11-15 12:37:00,137] - [  NEW BEST  ] - Stacker. Best score: 0.794147619047619 
+
+[2025-11-15 12:37:00,137] - [   MODEL    ] - 8 out of 8. Blender
+[2025-11-15 12:37:00,137] - [   START    ] - Working with Blender
+[2025-11-15 12:37:00,137] - [   START    ] - Tuning Blender
+[2025-11-15 12:37:00,175] - [   OPTUNA   ] - Best score 0.7963380952380952 with weights [0.0, 0.11446603088872445, 0.1291951885790642, 0.14847590630854748, 0.3474293869603747, 0.2604334872632892]
+[2025-11-15 12:37:00,210] - [   OPTUNA   ] - Best score 0.796452380952381 with weights [0.0, 0.17109169803015084, 0.11853112173255022, 0.15515925271023392, 0.31914995002727536, 0.2360679774997897]
+[2025-11-15 12:37:00,241] - [   OPTUNA   ] - Best score 0.796452380952381 with weights [0.0, 0.17109169803015084, 0.11853112173255022, 0.15515925271023392, 0.31914995002727536, 0.2360679774997897]
+[2025-11-15 12:37:00,241] - [BEST PARAMS ] - {'weights': [0.0, 0.17109169803015084, 0.11853112173255022, 0.15515925271023392, 0.31914995002727536, 0.2360679774997897], 'n': 6, 'random_state': 42, 'n_iters': 10, 'n_inner_iters': 3}
+[2025-11-15 12:37:00,241] - [    END     ] - Tuning Blender
+[2025-11-15 12:37:00,243] - [   SCORE    ] - Train: 0.796452380952381
+[2025-11-15 12:37:00,244] - [   SCORE    ] - OOF: 0.796452380952381
+[2025-11-15 12:37:00,245] - [    END     ] - Working with Blender
+[2025-11-15 12:37:00,246] - [  NEW BEST  ] - Blender. Best score: 0.796452380952381 
+
+RESULT_START
+{"ok": false, "predict_path": null, "score": 0.796452380952381, "message": "[Errno 22] Invalid argument: 'C:\\\\Users\\\\User1\\\\Desktop\\\\ITMO_bootcamp\\\\data\\\\datasets\\\\TEST\\\\test_2025-11-15 12:31:26.017693.csv'", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 57, in <module>\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\util\\_decorators.py\", line 333, in wrapper\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\core\\generic.py\", line 3989, in to_csv\n    return DataFrameRenderer(formatter).to_csv(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\format.py\", line 1014, in to_csv\n    csv_formatter.save()\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\csvs.py\", line 251, in save\n    with get_handle(\n         ^^^^^^^^^^^\n  File \"c:\\Users\\User1\\Desktop\\ITMO_bootcamp\\.venv\\Lib\\site-packages\\pandas\\io\\common.py\", line 873, in get_handle\n    handle = open(\n             ^^^^^\nOSError: [Errno 22] Invalid argument: 'C:\\\\Users\\\\User1\\\\Desktop\\\\ITMO_bootcamp\\\\data\\\\datasets\\\\TEST\\\\test_2025-11-15 12:31:26.017693.csv'\n"}
+RESULT_END
+2025-11-15 12:45:53,997 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 12:45:53,998 [DEBUG] Code sent, waiting for result...
+2025-11-15 12:51:42,127 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 12:51:42,128 [INFO] [sandbox stdout]
+Загружено строк: 1000
+RESULT_START
+{"ok": false, "predict_path": null, "score": 0.7959285714285714, "message": "name 'CSV_PATH_TO_PREDICT' is not defined", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 59, in <module>\nNameError: name 'CSV_PATH_TO_PREDICT' is not defined\n"}
+RESULT_END
+2025-11-15 12:54:01,386 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 12:54:01,387 [DEBUG] Code sent, waiting for result...
+2025-11-15 13:00:06,003 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 13:00:06,005 [INFO] [sandbox stdout]
+Загружено строк: 1000
+RESULT_START
+{"ok": false, "predict_path": null, "score": 0.7960380952380952, "message": "name 'CSV_PATH_TO_PREDICT' is not defined", "traceback": "Traceback (most recent call last):\n  File \"<string>\", line 59, in <module>\nNameError: name 'CSV_PATH_TO_PREDICT' is not defined\n"}
+RESULT_END
+2025-11-15 13:01:29,528 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 13:01:29,529 [DEBUG] Code sent, waiting for result...
+2025-11-15 13:01:29,530 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 13:01:29,531 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 59
+    CSV_PATH_TO_PREDICT = C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test_20251115_130122.csv
+                           ^
+SyntaxError: invalid syntax
+2025-11-15 13:02:08,013 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 13:02:08,014 [DEBUG] Code sent, waiting for result...
+2025-11-15 13:02:08,014 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 13:02:08,015 [WARNING] [sandbox stderr]
+Traceback (most recent call last):
+  File "<remote exec>", line 20, in <module>
+  File "<string>", line 59
+    CSV_PATH_TO_PREDICT = "C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\TEST\test_20251115_130204.csv"
+                                                                                                            ^
+SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 2-3: truncated \UXXXXXXXX escape
+2025-11-15 13:03:59,808 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 13:03:59,809 [DEBUG] Code sent, waiting for result...
+2025-11-15 13:09:46,670 [DEBUG] Received result from sandbox (attempt 1).
+2025-11-15 13:09:46,672 [INFO] [sandbox stdout]
+Загружено строк: 1000
+RESULT_START
+{"ok": true, "predict_path": "C:\\Users\\User1\\Desktop\\ITMO_bootcamp\\data\\datasets\\TEST\\test_20251115_130355.csv", "score": 0.7959285714285714, "message": "Все проверки пройдены"}
+RESULT_END
+2025-11-15 13:22:30,128 [DEBUG] Sending code to sandbox (attempt 1):
+import pandas as pd
+import numpy as np
+from pathlib import Path
+import json
+from datetime import datetime
+from automl import AutoML
+
+class_labels = ['good', 'bad']
+# Загружаем данные
+df = pd.read_csv(r'C:\Users\User1\Desktop\ITMO_bootcamp\data\datasets\openml_31_credit-g.csv')
+print(f"Загружено строк: {len(df)}")
+label = 'class'
+# Генерированный код пользователя
+import pandas as pd
+import numpy as np
+
+X = df.drop(columns=[label])
+y = df[label]
+
+label_mapping = {v: k for k, v in enumerate(class_labels)}
+if isinstance(y, pd.Series):
+    y = np.array(y.map(label_mapping), dtype=int)
+else:
+    y_series = pd.Series(y)
+    y = np.array(y_series.map(label_mapping), dtype=int)
+
+automl = AutoML(
+    task='classification',
+    use_preprocessing_pipeline=False,
+    feature_selector_type=None,
+    use_val_test_pipeline=False,
+    auto_models_init_kwargs={ 
+        "metric": "roc_auc",
+        "time_series": False,
+        "models_list": ["linear", "forests", "boostings"],
+        "blend": True,
+  ...[truncated]
+2025-11-15 13:22:30,129 [DEBUG] Code sent, waiting for result...
