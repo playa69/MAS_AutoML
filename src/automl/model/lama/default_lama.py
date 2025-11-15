@@ -56,6 +56,7 @@ class TabularLamaBase(BaseModel):
     def _prepare(self, X: FeaturesType, y: Optional[TargetType] = None, categorical_feature: Optional[List[Union[str, int]]] = None):
         seed_everything(self.random_state)
         X, y = self._prepare_data(X, y, categorical_feature)
+        
         if y is not None:
             X = X.assign(target=y)
             if self.model_type == "classification":
@@ -63,6 +64,18 @@ class TabularLamaBase(BaseModel):
                 # correct objective based on the number of classes
                 if self.model_type == 'classification' and self.num_class > 2:
                     self.task = "multiclass"
+        
+        # Convert CategoricalDtype columns to object or numeric types
+        # LightAutoML cannot handle CategoricalDtype directly
+        # Do this after adding target so we also convert target if needed
+        if isinstance(X, pd.DataFrame):
+            for col in X.columns:
+                if pd.api.types.is_categorical_dtype(X[col]):
+                    # Convert categorical to object (string) type
+                    # This preserves the values but changes the dtype
+                    X[col] = X[col].astype(str)
+        
+        if y is not None:
             return X, y
         return X
         

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from automl.feature_processing import (
     CatboostShapFeatureSelector,
@@ -205,10 +206,18 @@ class AutoML:
                 # If X_test is None, we can't fit val_test_pipeline, so skip it
                 log.warning("X_test is None, skipping val_test_pipeline", msg_type="fit")
 
-        categorical_features = X_train.columns[
-            (X_train.columns.str.startswith("OneHotEncoder"))
-            | (X_train.columns.str.startswith("OrdinalEncoder"))
-        ].tolist()
+        # Identify categorical features: only those with object or category dtype
+        # Note: OneHotEncoder and OrdinalEncoder create NUMERIC encoded columns,
+        # so they should NOT be marked as categorical (they're already encoded)
+        categorical_features = []
+        for col in X_train.columns:
+            # Only mark as categorical if it's actually categorical dtype (object or category)
+            # and NOT an encoded column (which should be numeric)
+            if (pd.api.types.is_object_dtype(X_train[col]) or 
+                pd.api.types.is_categorical_dtype(X_train[col])):
+                # Exclude encoded columns - they should be numeric, not categorical
+                if not (col.startswith("OneHotEncoder__") or col.startswith("OrdinalEncoder__")):
+                    categorical_features.append(col)
 
         if self.feature_selector is not None:
             self.feature_selector.fit(
